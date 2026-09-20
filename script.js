@@ -1,5 +1,5 @@
 const CONFIG = {
-  smartlinkUrl: "https://pinurl.to/_l7WXFb",
+  smartlinkUrl: "https://pimplehardnesscarnivorous.com/x7zgrhfuix?key=1b597d65e3fa566d005f9a1ec5e6d385",
   adCooldown: 15000
 };
 
@@ -120,7 +120,7 @@ function canTriggerAd() {
     now - lastAdTime >= CONFIG.adCooldown &&
     typeof CONFIG.smartlinkUrl === "string" &&
     CONFIG.smartlinkUrl.trim() !== "" &&
-    CONFIG.smartlinkUrl !== "https://YOUR-SMARTLINK-HERE.com"
+    CONFIG.smartlinkUrl !== "https://pimplehardnesscarnivorous.com/x7zgrhfuix?key=1b597d65e3fa566d005f9a1ec5e6d385"
   );
 }
 
