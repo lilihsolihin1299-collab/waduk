@@ -12,7 +12,7 @@ const films = [
   },
   {
     title: "Film 2",
-    video: "../videos/VID-20260826-WA0002~2.mp4",
+    video: "../videos/",
     description: "Deskripsi film 2"
   },
   {
