@@ -1,7 +1,8 @@
 /* CONFIGURATION */
 const CONFIG = {
-  smartlinkUrl: "https://pimplehardnesscarnivorous.com/x7zgrhfuix?key=1b597d65e3fa566d005f9a1ec5e6d385",  
-   adCooldown: 15000
+  smartlinkUrl: "https://pimplehardnesscarnivorous.com/x7zgrhfuix?key=1b597d65e3fa566d005f9a1ec5e6d385",
+  popunderUrl: "https://pimplehardnesscarnivorous.com/7d/c0/f5/7dc0f51577c92b0e7166a7adf63b7a86.js",
+  adCooldown: 15000
 };
 
 /* FILM DATA */
