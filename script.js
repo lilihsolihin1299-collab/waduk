@@ -1,6 +1,6 @@
 const CONFIG = {
   smartlinkUrl: "https://omg10.com/4/11563571",
-  popunderUrl: "MASUKKAN_URL_POPUNDER_DI_SINI",
+  popunderUrl: "https://omg10.com/4/11563571",
   adCooldown: 15000
 };
 
@@ -18,22 +18,22 @@ const films = [
   },
   {
     title: "Film 3",
-    video: "../videos/lower3.mp4",
+    video: "../videos/lower2.mp4",
     description: "Deskripsi film 3"
   },
   {
     title: "Film 4",
-    video: "../videos/lower4.mp4",
+    video: "../videos/lower3.mp4",
     description: "Deskripsi film 4"
   },
   {
     title: "Film 5",
-    video: "../videos/lower5.mp4",
+    video: "../videos/lower4.mp4",
     description: "Deskripsi film 5"
   },
   {
     title: "Film 6",
-    video: "../videos/lower2.mp4",
+    video: "../videos/lower5.mp4",
     description: "Deskripsi film 6"
   }
 ];
