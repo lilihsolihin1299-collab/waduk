@@ -1,5 +1,6 @@
 const CONFIG = {
   smartlinkUrl: "https://omg10.com/4/11563571",
+  popunderUrl: "MASUKKAN_URL_POPUNDER_DI_SINI",
   adCooldown: 15000
 };
 
@@ -31,15 +32,15 @@ const films = [
     description: "Deskripsi film 5"
   },
   {
-    title: "film 6",
+    title: "Film 6",
     video: "../videos/lower2.mp4",
     description: "Deskripsi film 6"
-  },
+  }
 ];
 
 let currentFilmIndex = 0;
-let lastAdTime = 0;
-let clickCount = 0; // Penghitung klik untuk alur 1, 2, 3
+let lastPopunderTime = 0;
+let clickCount = 0;
 let bookmarks = [];
 
 let controlsTimer = null;
@@ -117,15 +118,19 @@ function showToast(message) {
   }, 2400);
 }
 
-function canTriggerAd() {
-  const now = Date.now();
-  return now - lastAdTime >= CONFIG.adCooldown;
+/* =========================
+   POPUNDER COOLDOWN
+========================= */
+
+function canTriggerPopunder() {
+  return Date.now() - lastPopunderTime >= CONFIG.adCooldown;
 }
 
 function updateAdCooldown() {
-  const now = Date.now();
-  const elapsed = now - lastAdTime;
-  const remaining = Math.max(0, CONFIG.adCooldown - elapsed);
+  const remaining = Math.max(
+    0,
+    CONFIG.adCooldown - (Date.now() - lastPopunderTime)
+  );
 
   if (remaining <= 0) {
     statusPill.textContent = "Iklan siap";
@@ -135,17 +140,30 @@ function updateAdCooldown() {
   }
 
   const seconds = Math.ceil(remaining / 1000);
+
   statusPill.textContent = `Cooldown ${seconds}s`;
   statusPill.classList.add("visible");
   adStatus.textContent = `Cooldown iklan ${seconds} detik aktif.`;
 }
 
+/* =========================
+   POPUNDER
+========================= */
+
 function triggerPopunder() {
-  if (!canTriggerAd()) return;
-  lastAdTime = Date.now();
+  if (!canTriggerPopunder()) {
+    showToast("Popunder masih cooldown.");
+    return;
+  }
+
+  lastPopunderTime = Date.now();
 
   try {
-    const openedWindow = window.open(CONFIG.popunderUrl, "_blank");
+    const openedWindow = window.open(
+      CONFIG.popunderUrl,
+      "_blank"
+    );
+
     if (openedWindow) {
       openedWindow.blur();
       window.focus();
@@ -155,42 +173,49 @@ function triggerPopunder() {
   } catch (error) {
     console.error("Popunder gagal dibuka:", error);
   }
+
   updateAdCooldown();
 }
 
-function triggerSmartlink() {
-  if (!canTriggerAd()) return;
-  lastAdTime = Date.now();
+/* =========================
+   SMARTLINK
+========================= */
 
+function triggerSmartlink() {
   try {
     const openedWindow = window.open(
       CONFIG.smartlinkUrl,
-      "_blank",
-      "noopener,noreferrer"
+      "_blank"
     );
 
     if (!openedWindow) {
-      window.location.assign(CONFIG.smartlinkUrl);
+      window.location.href = CONFIG.smartlinkUrl;
     }
   } catch (error) {
     console.error("Smartlink gagal dibuka:", error);
   }
-  updateAdCooldown();
 }
+
+/* =========================
+   PLAY SEQUENCE
+========================= */
 
 function handlePlaySequence() {
   clickCount++;
 
   if (clickCount === 1) {
     triggerPopunder();
-    showToast("Klik sekali lagi untuk memutar video.");
-  } else if (clickCount === 2) {
-    triggerSmartlink();
-    showToast("Klik sekali lagi untuk mulai memutar.");
-  } else {
-    // KLIK 3 & SETERUSNYA: PEMUTARAN VIDEO
-    togglePlayPause();
+    showToast("Klik sekali lagi untuk membuka Smartlink.");
+    return;
   }
+
+  if (clickCount === 2) {
+    triggerSmartlink();
+    showToast("Klik sekali lagi untuk mulai memutar video.");
+    return;
+  }
+
+  togglePlayPause();
 }
 
 function togglePlayPause() {
@@ -210,7 +235,10 @@ function togglePlayPause() {
 
 function saveBookmarks() {
   try {
-    localStorage.setItem("zeelflex_bookmarks", JSON.stringify(bookmarks));
+    localStorage.setItem(
+      "zeelflex_bookmarks",
+      JSON.stringify(bookmarks)
+    );
   } catch (error) {
     console.warn("Bookmark tidak dapat disimpan:", error);
   }
@@ -219,14 +247,20 @@ function saveBookmarks() {
 function loadBookmarks() {
   try {
     const stored = localStorage.getItem("zeelflex_bookmarks");
+
     if (!stored) {
       bookmarks = [];
       return;
     }
+
     const parsed = JSON.parse(stored);
+
     if (Array.isArray(parsed)) {
       bookmarks = parsed.filter(
-        (index) => Number.isInteger(index) && index >= 0
+        (index) =>
+          Number.isInteger(index) &&
+          index >= 0 &&
+          index < films.length
       );
     } else {
       bookmarks = [];
@@ -242,7 +276,13 @@ function isBookmarked(index) {
 }
 
 function toggleBookmark(index) {
-  if (!Number.isInteger(index) || index < 0 || index >= films.length) return;
+  if (
+    !Number.isInteger(index) ||
+    index < 0 ||
+    index >= films.length
+  ) {
+    return;
+  }
 
   if (isBookmarked(index)) {
     bookmarks = bookmarks.filter((item) => item !== index);
@@ -272,6 +312,7 @@ function renderFilmButtons() {
     row.className = "film-row";
 
     const filmButton = document.createElement("button");
+
     filmButton.type = "button";
     filmButton.className = "film-button";
 
@@ -279,7 +320,11 @@ function renderFilmButtons() {
       filmButton.classList.add("active");
     }
 
-    filmButton.setAttribute("aria-label", `Putar ${film.title}`);
+    filmButton.setAttribute(
+      "aria-label",
+      `Putar ${film.title}`
+    );
+
     filmButton.innerHTML = `
       <span>${escapeHTML(film.title)}</span>
       <span class="button-arrow">→</span>
@@ -290,6 +335,7 @@ function renderFilmButtons() {
     });
 
     const bookmarkButton = document.createElement("button");
+
     bookmarkButton.type = "button";
     bookmarkButton.className = "bookmark-btn";
 
@@ -303,7 +349,12 @@ function renderFilmButtons() {
         ? `Hapus ${film.title} dari bookmark`
         : `Simpan ${film.title} ke bookmark`
     );
-    bookmarkButton.setAttribute("aria-pressed", String(isBookmarked(index)));
+
+    bookmarkButton.setAttribute(
+      "aria-pressed",
+      String(isBookmarked(index))
+    );
+
     bookmarkButton.innerHTML = bookmarkSVG();
 
     bookmarkButton.addEventListener("click", (event) => {
@@ -313,6 +364,7 @@ function renderFilmButtons() {
 
     row.appendChild(filmButton);
     row.appendChild(bookmarkButton);
+
     filmList.appendChild(row);
   });
 }
@@ -322,12 +374,20 @@ function updatePlayPauseIcon() {
     playPauseIcon.innerHTML = `
       <path d="M8 5.4v13.2c0 .8.9 1.3 1.6.9l10.2-6.6c.7-.5.7-1.4 0-1.8L9.6 4.5C8.9 4.1 8 4.6 8 5.4Z"></path>
     `;
-    playPauseBtn.setAttribute("aria-label", "Putar video");
+
+    playPauseBtn.setAttribute(
+      "aria-label",
+      "Putar video"
+    );
   } else {
     playPauseIcon.innerHTML = `
       <path d="M7 5h3v14H7V5Zm7 0h3v14h-3V5Z"></path>
     `;
-    playPauseBtn.setAttribute("aria-label", "Pause video");
+
+    playPauseBtn.setAttribute(
+      "aria-label",
+      "Pause video"
+    );
   }
 }
 
@@ -336,111 +396,198 @@ function updateVolumeIcon() {
     volumeIcon.innerHTML = `
       <path d="M4 9v6h4l5 4V5L8 9H4Zm13.7 1.3L16.3 11.7l1.7 1.7-1.7 1.7 1.4 1.4 1.7-1.7 1.7 1.7 1.4-1.4-1.7-1.7 1.7-1.7-1.4-1.4-1.7 1.7-1.7-1.7-1.4 1.3Z"></path>
     `;
-    muteBtn.setAttribute("aria-label", "Aktifkan suara");
+
+    muteBtn.setAttribute(
+      "aria-label",
+      "Aktifkan suara"
+    );
   } else {
     volumeIcon.innerHTML = `
       <path d="M4 9v6h4l5 4V5L8 9H4Zm12.5 1.1a1 1 0 0 0-1.4 1.4 2.1 2.1 0 0 1 0 3 1 1 0 0 0 1.4 1.4 4.1 4.1 0 0 0 0-5.8Zm2.2-2.2a1 1 0 0 0-1.4 1.4 5.2 5.2 0 0 1 0 7.4 1 1 0 1 0 1.4 1.4 7.2 7.2 0 0 0 0-10.2Z"></path>
     `;
-    muteBtn.setAttribute("aria-label", "Matikan suara");
+
+    muteBtn.setAttribute(
+      "aria-label",
+      "Matikan suara"
+    );
   }
 }
 
 function updatePlayerTime() {
   const current = video.currentTime || 0;
-  const duration = Number.isFinite(video.duration) ? video.duration : 0;
-  const percentage = duration > 0 ? (current / duration) * 100 : 0;
+
+  const duration =
+    Number.isFinite(video.duration)
+      ? video.duration
+      : 0;
+
+  const percentage =
+    duration > 0
+      ? (current / duration) * 100
+      : 0;
 
   progressFill.style.width = `${percentage}%`;
-  progressTrack.setAttribute("aria-valuenow", String(Math.round(percentage)));
-  timeLabel.textContent = `${formatTime(current)} / ${formatTime(duration)}`;
+
+  progressTrack.setAttribute(
+    "aria-valuenow",
+    String(Math.round(percentage))
+  );
+
+  timeLabel.textContent =
+    `${formatTime(current)} / ${formatTime(duration)}`;
 }
 
 function setVideoSource(url) {
   video.pause();
+
   videoSource.src = url;
 
   const isPlaceholder =
-    !url || url === "YOUR_VIDEO_URL.mp4" || url.startsWith("VIDEO_URL_");
+    !url ||
+    url === "YOUR_VIDEO_URL.mp4" ||
+    url.startsWith("VIDEO_URL_");
 
   if (isPlaceholder) {
     video.removeAttribute("poster");
   }
+
   video.load();
 }
 
 function loadFilm(index) {
-  if (!Number.isInteger(index) || index < 0 || index >= films.length) return;
+  if (
+    !Number.isInteger(index) ||
+    index < 0 ||
+    index >= films.length
+  ) {
+    return;
+  }
 
   currentFilmIndex = index;
-  clickCount = 0; // RESET PENGHITUNG KLIK SETIAP GANTI FILM
+
+  /* RESET URUTAN IKLAN SETIAP GANTI FILM */
+  clickCount = 0;
 
   const film = films[index];
 
-  playerWrap.classList.remove("player-changing");
-  void playerWrap.offsetWidth;
-  playerWrap.classList.add("player-changing");
+  playerWrap.classList.remove(
+    "player-changing"
+  );
 
-  filmTitleHeading.textContent = film.title;
-  filmDescription.textContent = film.description;
-  filmNowPlaying.textContent = film.title;
+  void playerWrap.offsetWidth;
+
+  playerWrap.classList.add(
+    "player-changing"
+  );
+
+  filmTitleHeading.textContent =
+    film.title;
+
+  filmDescription.textContent =
+    film.description;
+
+  filmNowPlaying.textContent =
+    film.title;
 
   setVideoSource(film.video);
 
   video.currentTime = 0;
-  progressFill.style.width = "0%";
-  progressTrack.setAttribute("aria-valuenow", "0");
 
-  videoPlaceholder.classList.remove("hidden");
+  progressFill.style.width = "0%";
+
+  progressTrack.setAttribute(
+    "aria-valuenow",
+    "0"
+  );
+
+  videoPlaceholder.classList.remove(
+    "hidden"
+  );
 
   updatePlayPauseIcon();
   updateVolumeIcon();
   updatePlayerTime();
   renderFilmButtons();
 
-  playerWrap.setAttribute("aria-label", `Video player untuk ${film.title}`);
+  playerWrap.setAttribute(
+    "aria-label",
+    `Video player untuk ${film.title}`
+  );
 
   if (window.innerWidth < 700) {
-    playerWrap.scrollIntoView({ behavior: "smooth", block: "center" });
+    playerWrap.scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
   }
 
   window.setTimeout(() => {
-    playerWrap.classList.remove("player-changing");
+    playerWrap.classList.remove(
+      "player-changing"
+    );
   }, 450);
 }
 
 function nextFilm() {
-  const nextIndex = (currentFilmIndex + 1) % films.length;
+  const nextIndex =
+    (currentFilmIndex + 1) % films.length;
+
   loadFilm(nextIndex);
 }
 
 function showCenterPause() {
   clearTimeout(centerPauseTimer);
+
   if (video.paused) {
     centerPause.classList.remove("show");
     return;
   }
+
   centerPause.classList.add("show");
+
   centerPauseTimer = setTimeout(() => {
     centerPause.classList.remove("show");
   }, 850);
 }
 
 function toggleControls() {
-  playerWrap.classList.add("controls-visible");
+  playerWrap.classList.add(
+    "controls-visible"
+  );
+
   clearTimeout(controlsTimer);
+
   controlsTimer = setTimeout(() => {
     if (!video.paused) {
-      playerWrap.classList.remove("controls-visible");
+      playerWrap.classList.remove(
+        "controls-visible"
+      );
     }
   }, 2800);
 }
 
 function seekVideo(clientX) {
-  const rect = progressTrack.getBoundingClientRect();
-  if (rect.width <= 0 || !Number.isFinite(video.duration)) return;
+  const rect =
+    progressTrack.getBoundingClientRect();
 
-  const ratio = Math.min(1, Math.max(0, (clientX - rect.left) / rect.width));
-  video.currentTime = ratio * video.duration;
+  if (
+    rect.width <= 0 ||
+    !Number.isFinite(video.duration)
+  ) {
+    return;
+  }
+
+  const ratio = Math.min(
+    1,
+    Math.max(
+      0,
+      (clientX - rect.left) / rect.width
+    )
+  );
+
+  video.currentTime =
+    ratio * video.duration;
+
   updatePlayerTime();
 }
 
@@ -449,22 +596,31 @@ async function toggleFullscreen() {
     if (!document.fullscreenElement) {
       if (playerWrap.requestFullscreen) {
         await playerWrap.requestFullscreen();
-      } else if (video.webkitEnterFullscreen) {
+      } else if (
+        video.webkitEnterFullscreen
+      ) {
         video.webkitEnterFullscreen();
       } else {
-        showToast("Fullscreen tidak didukung browser ini.");
+        showToast(
+          "Fullscreen tidak didukung browser ini."
+        );
       }
     } else {
       await document.exitFullscreen();
     }
   } catch (error) {
-    console.warn("Fullscreen gagal:", error);
+    console.warn(
+      "Fullscreen gagal:",
+      error
+    );
   }
 }
 
 function initPlayer() {
   loadBookmarks();
+
   renderFilmButtons();
+
   loadFilm(0);
 
   video.volume = 1;
@@ -475,164 +631,304 @@ function initPlayer() {
   updatePlayerTime();
   updateAdCooldown();
 
-  // ATUR PANGGILAN KETIKA TOMBOL PLAY DIPENCET
   video.addEventListener("click", () => {
     toggleControls();
     handlePlaySequence();
   });
 
-  bigPlayBtn.addEventListener("click", (event) => {
-    event.stopPropagation();
-    handlePlaySequence();
-  });
-
-  playPauseBtn.addEventListener("click", (event) => {
-    event.stopPropagation();
-    handlePlaySequence();
-  });
-
-  centerPause.addEventListener("click", (event) => {
-    event.stopPropagation();
-    handlePlaySequence();
-  });
-
-  fullscreenBtn.addEventListener("click", (event) => {
-    event.stopPropagation();
-    toggleFullscreen();
-  });
-
-  muteBtn.addEventListener("click", (event) => {
-    event.stopPropagation();
-    video.muted = !video.muted;
-    if (!video.muted && video.volume === 0) {
-      video.volume = 0.7;
-      volumeSlider.value = "0.7";
-    }
-    updateVolumeIcon();
-  });
-
-  volumeSlider.addEventListener("input", () => {
-    video.volume = Number(volumeSlider.value);
-    if (video.volume > 0) {
-      video.muted = false;
-    }
-    updateVolumeIcon();
-  });
-
-  progressTrack.addEventListener("click", (event) => {
-    event.stopPropagation();
-    seekVideo(event.clientX);
-  });
-
-  progressTrack.addEventListener("keydown", (event) => {
-    const duration = video.duration;
-    if (!Number.isFinite(duration)) return;
-
-    let targetTime = video.currentTime;
-    if (event.key === "ArrowRight") {
-      targetTime += 5;
-    } else if (event.key === "ArrowLeft") {
-      targetTime -= 5;
-    } else {
-      return;
-    }
-
-    event.preventDefault();
-    video.currentTime = Math.min(duration, Math.max(0, targetTime));
-    updatePlayerTime();
-  });
-
-  playerWrap.addEventListener("keydown", (event) => {
-    if (event.target === volumeSlider || event.target === progressTrack) return;
-
-    if (event.code === "Space") {
-      event.preventDefault();
+  bigPlayBtn.addEventListener(
+    "click",
+    (event) => {
+      event.stopPropagation();
       handlePlaySequence();
     }
+  );
 
-    if (event.key.toLowerCase() === "f") {
-      event.preventDefault();
+  playPauseBtn.addEventListener(
+    "click",
+    (event) => {
+      event.stopPropagation();
+      handlePlaySequence();
+    }
+  );
+
+  centerPause.addEventListener(
+    "click",
+    (event) => {
+      event.stopPropagation();
+      handlePlaySequence();
+    }
+  );
+
+  fullscreenBtn.addEventListener(
+    "click",
+    (event) => {
+      event.stopPropagation();
       toggleFullscreen();
     }
+  );
 
-    if (event.key.toLowerCase() === "m") {
-      event.preventDefault();
+  muteBtn.addEventListener(
+    "click",
+    (event) => {
+      event.stopPropagation();
+
       video.muted = !video.muted;
+
+      if (
+        !video.muted &&
+        video.volume === 0
+      ) {
+        video.volume = 0.7;
+        volumeSlider.value = "0.7";
+      }
+
       updateVolumeIcon();
     }
-  });
+  );
 
-  playerWrap.addEventListener("mousemove", () => toggleControls());
-  playerWrap.addEventListener("touchstart", () => toggleControls(), {
-    passive: true
-  });
+  volumeSlider.addEventListener(
+    "input",
+    () => {
+      video.volume =
+        Number(volumeSlider.value);
 
-  video.addEventListener("timeupdate", updatePlayerTime);
-  video.addEventListener("loadedmetadata", updatePlayerTime);
+      if (video.volume > 0) {
+        video.muted = false;
+      }
 
-  video.addEventListener("play", () => {
-    videoPlaceholder.classList.add("hidden");
-    updatePlayPauseIcon();
-    centerPause.classList.remove("show");
-    toggleControls();
-  });
-
-  video.addEventListener("pause", () => {
-    updatePlayPauseIcon();
-    videoPlaceholder.classList.remove("hidden");
-    playerWrap.classList.add("controls-visible");
-  });
-
-  video.addEventListener("playing", () => {
-    videoPlaceholder.classList.add("hidden");
-    updatePlayPauseIcon();
-  });
-
-  video.addEventListener("ended", () => {
-    updatePlayPauseIcon();
-    videoPlaceholder.classList.remove("hidden");
-    playerWrap.classList.add("controls-visible");
-  });
-
-  video.addEventListener("error", () => {
-    videoPlaceholder.classList.remove("hidden");
-    const currentUrl = films[currentFilmIndex].video;
-
-    if (
-      currentUrl === "VIDEO_URL_1" ||
-      currentUrl === "VIDEO_URL_2" ||
-      currentUrl === "VIDEO_URL_3" ||
-      currentUrl === "VIDEO_URL_4" ||
-      currentUrl === "VIDEO_URL_5" ||
-      currentUrl === "VIDEO_URL_6" ||
-      currentUrl === "YOUR_VIDEO_URL.mp4"
-    ) {
-      showToast("Ganti URL video pada array films terlebih dahulu.");
-    } else {
-      showToast("Video gagal dimuat. Periksa URL atau format videonya.");
+      updateVolumeIcon();
     }
-  });
+  );
 
-  video.addEventListener("dblclick", () => toggleFullscreen());
-  nextBtn.addEventListener("click", () => nextFilm());
-
-  playerWrap.addEventListener("pointerdown", () => toggleControls());
-  playerWrap.addEventListener("click", (event) => {
-    if (event.target === playerWrap && !video.paused) {
-      showCenterPause();
+  progressTrack.addEventListener(
+    "click",
+    (event) => {
+      event.stopPropagation();
+      seekVideo(event.clientX);
     }
-  });
+  );
 
-  document.addEventListener("visibilitychange", () => updateAdCooldown());
-  setInterval(updateAdCooldown, 1000);
+  progressTrack.addEventListener(
+    "keydown",
+    (event) => {
+      const duration = video.duration;
+
+      if (!Number.isFinite(duration)) {
+        return;
+      }
+
+      let targetTime =
+        video.currentTime;
+
+      if (event.key === "ArrowRight") {
+        targetTime += 5;
+      } else if (
+        event.key === "ArrowLeft"
+      ) {
+        targetTime -= 5;
+      } else {
+        return;
+      }
+
+      event.preventDefault();
+
+      video.currentTime =
+        Math.min(
+          duration,
+          Math.max(0, targetTime)
+        );
+
+      updatePlayerTime();
+    }
+  );
+
+  playerWrap.addEventListener(
+    "keydown",
+    (event) => {
+      if (
+        event.target === volumeSlider ||
+        event.target === progressTrack
+      ) {
+        return;
+      }
+
+      if (event.code === "Space") {
+        event.preventDefault();
+        handlePlaySequence();
+      }
+
+      if (
+        event.key.toLowerCase() === "f"
+      ) {
+        event.preventDefault();
+        toggleFullscreen();
+      }
+
+      if (
+        event.key.toLowerCase() === "m"
+      ) {
+        event.preventDefault();
+
+        video.muted = !video.muted;
+
+        updateVolumeIcon();
+      }
+    }
+  );
+
+  playerWrap.addEventListener(
+    "mousemove",
+    () => toggleControls()
+  );
+
+  playerWrap.addEventListener(
+    "touchstart",
+    () => toggleControls(),
+    {
+      passive: true
+    }
+  );
+
+  video.addEventListener(
+    "timeupdate",
+    updatePlayerTime
+  );
+
+  video.addEventListener(
+    "loadedmetadata",
+    updatePlayerTime
+  );
+
+  video.addEventListener(
+    "play",
+    () => {
+      videoPlaceholder.classList.add(
+        "hidden"
+      );
+
+      updatePlayPauseIcon();
+
+      centerPause.classList.remove(
+        "show"
+      );
+
+      toggleControls();
+    }
+  );
+
+  video.addEventListener(
+    "pause",
+    () => {
+      updatePlayPauseIcon();
+
+      videoPlaceholder.classList.remove(
+        "hidden"
+      );
+
+      playerWrap.classList.add(
+        "controls-visible"
+      );
+    }
+  );
+
+  video.addEventListener(
+    "playing",
+    () => {
+      videoPlaceholder.classList.add(
+        "hidden"
+      );
+
+      updatePlayPauseIcon();
+    }
+  );
+
+  video.addEventListener(
+    "ended",
+    () => {
+      updatePlayPauseIcon();
+
+      videoPlaceholder.classList.remove(
+        "hidden"
+      );
+
+      playerWrap.classList.add(
+        "controls-visible"
+      );
+    }
+  );
+
+  video.addEventListener(
+    "error",
+    () => {
+      videoPlaceholder.classList.remove(
+        "hidden"
+      );
+
+      const currentUrl =
+        films[currentFilmIndex].video;
+
+      if (
+        currentUrl === "VIDEO_URL_1" ||
+        currentUrl === "VIDEO_URL_2" ||
+        currentUrl === "VIDEO_URL_3" ||
+        currentUrl === "VIDEO_URL_4" ||
+        currentUrl === "VIDEO_URL_5" ||
+        currentUrl === "VIDEO_URL_6" ||
+        currentUrl === "YOUR_VIDEO_URL.mp4"
+      ) {
+        showToast(
+          "Ganti URL video pada array films terlebih dahulu."
+        );
+      } else {
+        showToast(
+          "Video gagal dimuat. Periksa URL atau format videonya."
+        );
+      }
+    }
+  );
+
+  video.addEventListener(
+    "dblclick",
+    () => toggleFullscreen()
+  );
+
+  nextBtn.addEventListener(
+    "click",
+    () => nextFilm()
+  );
+
+  playerWrap.addEventListener(
+    "pointerdown",
+    () => toggleControls()
+  );
+
+  playerWrap.addEventListener(
+    "click",
+    (event) => {
+      if (
+        event.target === playerWrap &&
+        !video.paused
+      ) {
+        showCenterPause();
+      }
+    }
+  );
+
+  document.addEventListener(
+    "visibilitychange",
+    () => updateAdCooldown()
+  );
+
+  setInterval(
+    updateAdCooldown,
+    1000
+  );
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  initPlayer();
-});
-document.addEventListener("click", function openGlobalSmartlink() {
-  if (canTriggerAd()) {
-    triggerSmartlink();
-    document.removeEventListener("click", openGlobalSmartlink);
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
+    initPlayer();
   }
-}, { once: true });
+);
