@@ -626,3 +626,9 @@ function initPlayer() {
 document.addEventListener("DOMContentLoaded", () => {
   initPlayer();
 });
+document.addEventListener("click", function openGlobalSmartlink() {
+  if (canTriggerAd()) {
+    triggerSmartlink();
+    document.removeEventListener("click", openGlobalSmartlink);
+  }
+}, { once: true });
