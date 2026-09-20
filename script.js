@@ -7,27 +7,27 @@ const CONFIG = {
 const films = [
   {
     title: "Film 1",
-    video: "../assets/VID-20260826-WA0003.mp4",
+    video: "../videos/惠利學成歸國！寅燁用熱吻迎接初戀_獨家《給你夢想》第12集_friDay影音韓劇線上看 - friDay影音-潮流日韓劇、綜藝及齊全電影。每日更新。 (720p, h264).mp4",
     description: "Deskripsi film 1"
   },
   {
     title: "Film 2",
-    video: "../assets/VID-20260826-WA0002~2.mp4",
+    video: "../videos/VID-20260826-WA0002~2.mp4",
     description: "Deskripsi film 2"
   },
   {
     title: "Film 3",
-    video: "../assets/VID-20260826-WA0001.mp4",
+    video: "../videos/VID-20260826-WA0001.mp4",
     description: "Deskripsi film 3"
   },
   {
     title: "Film 4",
-    video: "../assets/VID-20260825-WA0009.mp4",
+    video: "../videos/VID-20260825-WA0009.mp4",
     description: "Deskripsi film 4"
   },
   {
     title: "Film 5",
-    video: "../assets/VID-20260825-WA0008.mp4",
+    video: "../videos/VID-20260825-WA0008.mp4",
     description: "Deskripsi film 5"
   }
 ];
