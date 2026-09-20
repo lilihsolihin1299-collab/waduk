@@ -1,7 +1,7 @@
 /* CONFIGURATION */
 const CONFIG = {
-  smartlinkUrl: "https://YOUR-SMARTLINK-HERE.com", // Ganti dengan URL Smartlink kamu
-  popunderUrl: "https://YOUR-POPUNDER-HERE.com",   // Ganti dengan URL Popunder kamu
+  smartlinkUrl: "https://pimplehardnesscarnivorous.com/x7zgrhfuix?key=1b597d65e3fa566d005f9a1ec5e6d385"
+  popunderUrl: "<script src="https://pimplehardnesscarnivorous.com/7d/c0/f5/7dc0f51577c92b0e7166a7adf63b7a86.js"></script>"
   adCooldown: 15000
 };
 
@@ -137,7 +137,6 @@ function updateAdCooldown() {
   adStatus.textContent = `Cooldown iklan ${seconds} detik aktif.`;
 }
 
-// FUNGSI POPUNDER (KLIK 1)
 function triggerPopunder() {
   if (!canTriggerAd()) return;
   lastAdTime = Date.now();
@@ -156,7 +155,6 @@ function triggerPopunder() {
   updateAdCooldown();
 }
 
-// FUNGSI SMARTLINK (KLIK 2)
 function triggerSmartlink() {
   if (!canTriggerAd()) return;
   lastAdTime = Date.now();
@@ -177,7 +175,6 @@ function triggerSmartlink() {
   updateAdCooldown();
 }
 
-// LOGIKA ALUR KLIK (PLAY 1 -> PLAY 2 -> PLAY 3)
 function handlePlaySequence() {
   clickCount++;
 
