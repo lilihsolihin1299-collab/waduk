@@ -7,12 +7,12 @@ const CONFIG = {
 const films = [
   {
     title: "Film 1",
-    video: "../assets/VID-20260826-WA0003.mp4",
+    video: "https://files.catbox.moe/14uhlv.mp4",
     description: "Deskripsi film 1"
   },
   {
     title: "Film 2",
-    video: "../assets/VID-20260826-WA0002~2.mp4",
+    video: "https://files.catbox.moe/az32e1.mp4",
     description: "Deskripsi film 2"
   },
   {
