@@ -29,12 +29,12 @@ const films = [
     title: "Film 5",
     video: "../videos/lower5.mp4",
     description: "Deskripsi film 5"
-  }
+  },
   {
-    title: "film 6"
+    title: "film 6",
     video: "../videos/lower2.mp4",
     description: "Deskripsi film 6"
-  }
+  },
 ];
 
 let currentFilmIndex = 0;
