@@ -30,6 +30,11 @@ const films = [
     video: "../videos/lower5.mp4",
     description: "Deskripsi film 5"
   }
+  {
+    title: "film 6"
+    video: "../videos/lower2.mp4",
+    description: "Deskripsi film 6"
+  }
 ];
 
 let currentFilmIndex = 0;
@@ -599,6 +604,7 @@ function initPlayer() {
       currentUrl === "VIDEO_URL_3" ||
       currentUrl === "VIDEO_URL_4" ||
       currentUrl === "VIDEO_URL_5" ||
+      currentUrl === "VIDEO_URL_6" ||
       currentUrl === "YOUR_VIDEO_URL.mp4"
     ) {
       showToast("Ganti URL video pada array films terlebih dahulu.");
