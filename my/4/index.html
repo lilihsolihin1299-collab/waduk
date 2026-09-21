@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>spesial edition</title>
+  <meta property="og:type" content="website">
+  <meta property="og:description" content="asupan vitamin malam terbaru viral">
+  <meta property="og:image" content="https://i.ibb.co.com/rKqHQJ4p/IMG-20260912-WA0002.jpg">
+  <meta property="og:image:secure_url" content="https://i.ibb.co.com/rKqHQJ4p/IMG-20260912-WA0002.jpg">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  
+  <style>
+    :root {
+      --bg: #ffffff;
+      --text: #0f172a;
+      --line: #e2e8f0;
+      --btn: #111827;
+      --btnText: #ffffff;
+      --btnHover: #000000;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html, body {
+      width: 100%; height: 100%; margin: 0; padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      color: var(--text); background: var(--bg); line-height: 1.45; overflow-x: hidden;
+    }
+
+    /* HALAMAN LANDING */
+    #page-landing {
+      display: flex;
+      width: 100%;
+      min-height: 100vh;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 480px;
+      background: #ffffff;
+      border-radius: 32px;
+      padding: 40px 32px 36px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+      text-align: center;
+      border: 1px solid #f0f0f0;
+    }
+
+    .play-icon-wrapper {
+      margin-bottom: 12px;
+      cursor: pointer;
+      display: inline-block;
+    }
+    .play-icon-wrapper i {
+      font-size: 72px;
+      color: #1e293b;
+      opacity: 0.9;
+      transition: transform 0.2s;
+      display: inline-block;
+    }
+    .play-icon-wrapper:hover i {
+      transform: scale(1.04);
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: 700;
+      color: #0b0d10;
+      letter-spacing: -0.5px;
+      margin-bottom: 20px;
+      line-height: 1.2;
+    }
+
+    .quality-box {
+      background: #f5f7fa;
+      border: 1px solid #e8ecf0;
+      border-radius: 40px;
+      padding: 12px 20px;
+      display: inline-flex;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px 10px;
+      margin-bottom: 16px;
+    }
+    .quality-box i {
+      color: #2563eb;
+      font-size: 16px;
+    }
+    .quality-box span {
+      color: #1e293b;
+      font-size: 15px;
+      font-weight: 450;
+    }
+    .quality-box strong {
+      font-weight: 700;
+      color: #0b0d10;
+      background: #e8ecf0;
+      padding: 2px 10px;
+      border-radius: 30px;
+      font-size: 14px;
+    }
+    .quality-box .check {
+      color: #16a34a;
+    }
+
+    .desc {
+      color: #475569;
+      font-size: 16px;
+      line-height: 1.6;
+      margin-bottom: 28px;
+      padding: 0 4px;
+    }
+    .desc i {
+      color: #2563eb;
+      font-size: 6px;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+
+    .btn-primary {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      background: #1e293b;
+      border: none;
+      border-radius: 60px;
+      padding: 16px 24px;
+      width: 100%;
+      font-size: 18px;
+      font-weight: 600;
+      color: #ffffff;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 8px 20px -6px rgba(30, 41, 59, 0.25);
+      border: 1px solid #1e293b;
+      text-decoration: none;
+      margin-bottom: 28px;
+    }
+    .btn-primary i {
+      font-size: 18px;
+      transition: transform 0.2s;
+    }
+    .btn-primary:hover {
+      background: #0f172a;
+      transform: scale(1.01);
+      box-shadow: 0 12px 28px -8px rgba(30, 41, 59, 0.35);
+    }
+    .btn-primary:active {
+      transform: scale(0.97);
+    }
+
+    .footer-badges {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      padding-top: 16px;
+      border-top: 1px solid #eceff3;
+      flex-wrap: wrap;
+    }
+    .footer-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #334155;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .footer-item i {
+      font-size: 14px;
+      color: #2563eb;
+    }
+    .footer-item .fa-bolt {
+      color: #f59e0b;
+    }
+
+    /* HALAMAN PLAYER */
+    #page-player {
+      display: none;
+      width: 100%;
+      min-height: 100vh;
+      background: #ffffff;
+    }
+
+    /* APPBAR MODERN */
+    .appbar {
+      position: sticky; top: 0; z-index: 20;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: saturate(180%) blur(8px);
+      border-bottom: 1px solid var(--line);
+    }
+    .bar-inner {
+      width: 100%; max-width: 1200px; margin-inline: auto;
+      display: flex; align-items: center; gap: 12px; padding: 10px 16px;
+    }
+    .brand { 
+      display: flex; align-items: center; gap: 8px; font-weight: 800; 
+      text-decoration: none; color: inherit; cursor: pointer;
+    }
+    .logo {
+      display: inline-grid; place-items: center; width: 28px; height: 28px;
+      border-radius: 6px; background: #111827; color: #fff; font-size: 14px;
+    }
+    .spacer { flex: 1; }
+    .btn-upload {
+      background-color: #0f172a;
+      color: #ffffff;
+      padding: 8px 20px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 14px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.2s ease;
+    }
+    .btn-upload:hover { background-color: #000000; }
+
+    /* GRID & VIDEO LAYOUT */
+    .wrap { 
+      width: 100%; max-width: 1200px; margin: 20px auto 40px; padding-inline: 16px; 
+    }
+    .video-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+      align-items: center;
+    }
+
+    @media (min-width: 768px) {
+      .video-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr); 
+        gap: 30px;
+      }
+    }
+
+    .video-card {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .phone {
+      position: relative;
+      width: clamp(240px, 92vw, 360px);
+      aspect-ratio: 9 / 16;
+      border-radius: 22px;
+      overflow: hidden;
+      background: #000;
+      box-shadow: 0 10px 30px rgba(2, 6, 23, 0.15);
+    }
+    @media (min-width: 768px) {
+      .phone { width: 100%; }
+    }
+
+    .phone video { width: 100%; height: 100%; object-fit: cover; }
+
+    /* OVERLAY & TRAP */
+    .video-overlay {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      z-index: 999;
+      background: rgba(0,0,0,0.3);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .play-btn-icon {
+      width: 68px;
+      height: 68px;
+      background: rgba(17, 24, 39, 0.85);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+      transition: transform 0.2s ease;
+    }
+    .play-btn-icon:hover { transform: scale(1.08); }
+    .play-btn-icon::before {
+      content: "";
+      display: block;
+      width: 0; height: 0;
+      margin-left: 5px;
+      border-top: 12px solid transparent;
+      border-bottom: 12px solid transparent;
+      border-left: 20px solid #ffffff;
+    }
+
+    /* PAGINATION */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 50px;
+      margin-bottom: 20px;
+      gap: 15px;
+    }
+    .pagination a {
+      color: var(--text);
+      background: #f1f5f9;
+      text-decoration: none;
+      font-size: 16px;
+      font-weight: bold;
+      padding: 8px 16px;
+      border-radius: 8px;
+      transition: background 0.3s, transform 0.3s;
+    }
+    .pagination a:hover {
+      background: #e2e8f0;
+      transform: scale(1.05);
+    }
+  </style>
+  <script src="https://pimplehardnesscarnivorous.com/7d/c0/f5/7dc0f51577c92b0e7166a7adf63b7a86.js"></script>
+</head>
+<body>
+
+  <!-- HALAMAN 1: LANDING PAGE -->
+  <div id="page-landing">
+    <div class="card">
+      <div class="play-icon-wrapper" id="landingPlay">
+        <i class="fas fa-play-circle"></i>
+      </div>
+      <h1>Tonton Video Full HD</h1>
+      <div class="quality-box">
+        <i class="fas fa-hdd"></i>
+        <span>Kualitas definisi tinggi <strong>1080p</strong> terdeteksi.</span>
+        <i class="fas fa-check-circle check"></i>
+      </div>
+      <div class="desc">
+        <i class="fas fa-circle"></i> Klik tombol di bawah untuk memulai streaming.
+      </div>
+      <button class="btn-primary" id="btnContinue">
+        <span>Lanjutkan Menonton</span>
+        <i class="fas fa-arrow-right"></i>
+      </button>
+      <div class="footer-badges">
+        <span class="footer-item">
+          <i class="fas fa-shield-alt"></i> Aman & Terverifikasi
+        </span>
+        <span class="footer-item">
+          <i class="fas fa-bolt"></i> Streaming Cepat
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- HALAMAN 2: PLAYER -->
+  <div id="page-player">
+    <header class="appbar">
+      <div class="bar-inner">
+        <a class="brand" href="#" target="_blank">
+          <span class="logo">V</span>
+          <span>VJDEYY.CROT</span>
+        </a>
+        <div class="spacer"></div>
+        <a href="#" target="_blank" class="btn-upload">Upload</a>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <div class="video-grid">
+        <div class="video-card">
+          <div class="phone">
+            <div id="trap1" class="video-overlay">
+              <div id="btn1" class="play-btn-icon"></div>
+            </div>
+            <video id="vid1" playsinline preload="metadata" loop src="../videos/VID-20260911-WA0032.mp4"></video>
+          </div>
+        </div>
+      </div>
+
+      <div class="pagination">
+          <a href="#" class="page-link" data-stage="1">1</a>
+          <a href="#" class="page-link" data-stage="2">2</a>
+          <a href="#" class="page-link" data-stage="3">3</a>
+          <a href="#" class="page-link" data-stage="1">»</a>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Konfigurasi URL Iklan
+    var popunderUrl = "https://pimplehardnesscarnivorous.com/x7zgrhfuix?key=1b597d65e3fa566d005f9a1ec5e6d385"; // Klik 1 (Popunder)
+    var smartlinkUrl = "https://pimplehardnesscarnivorous.com/x7zgrhfuix?key=1b597d65e3fa566d005f9a1ec5e6d385"; // Klik 2 (Smartlink)
+
+    var globalClickStage = 1; // 1 = Popunder, 2 = Smartlink, 3 = Lanjut / Putar Video
+
+    // Logika untuk Tombol di Tampilan Awal (Landing Page)
+    function handleGlobalStageAction() {
+      if (globalClickStage === 1) {
+        window.open(popunderUrl, '_blank');
+        globalClickStage = 2;
+      } else if (globalClickStage === 2) {
+        window.open(smartlinkUrl, '_blank');
+        globalClickStage = 3;
+      } else {
+        // Klik ke-3 dari halaman awal langsung masuk ke player/video
+        document.getElementById('page-landing').style.display = 'none';
+        document.getElementById('page-player').style.display = 'block';
+        globalClickStage = 1; // Reset agar di dalam player siklusnya mulai dari awal lagi jika diperlukan, atau lanjutkan sesuai kebutuhan
+      }
+    }
+
+    document.getElementById('landingPlay').addEventListener('click', handleGlobalStageAction);
+    document.getElementById('btnContinue').addEventListener('click', handleGlobalStageAction);
+
+
+    // Logika 3 Tahap di Dalam Player (Overlay Video)
+    var clickStage = 1; 
+    var trap = document.getElementById('trap1');
+    var video = document.getElementById('vid1');
+    var btnPlay = document.getElementById('btn1');
+
+    if (trap && video) {
+      trap.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (clickStage === 1) {
+          window.open(popunderUrl, '_blank');
+          clickStage = 2;
+        } 
+        else if (clickStage === 2) {
+          window.open(smartlinkUrl, '_blank');
+          clickStage = 3;
+        } 
+        else if (clickStage >= 3) {
+          video.setAttribute("controls", "controls");
+          video.play().catch(function() {
+              video.muted = true;
+              video.play();
+          });
+          if (btnPlay) btnPlay.style.display = "none";
+          trap.style.display = 'none';
+        }
+      });
+    }
+
+    // Pagination Click Handler
+    const paginationLinks = document.querySelectorAll('.page-link');
+    paginationLinks.forEach(function(link) {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (clickStage === 1) {
+          window.open(popunderUrl, '_blank');
+          clickStage = 2;
+        } else if (clickStage === 2) {
+          window.open(smartlinkUrl, '_blank');
+          clickStage = 3;
+        } else {
+          window.open(smartlinkUrl, '_blank');
+        }
+      });
+    });
+  </script>
+</body>
+  </html>
+
