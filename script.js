@@ -1,6 +1,6 @@
 const CONFIG = {
-  smartlinkUrl: "https://omg10.com/4/11563571",
-  popunderUrl: "https://omg10.com/4/11563571",
+  smartlinkUrl: "https://pimplehardnesscarnivorous.com/x7zgrhfuix?key=1b597d65e3fa566d005f9a1ec5e6d385",
+  popunderUrl: "https://pimplehardnesscarnivorous.com/x7zgrhfuix?key=1b597d65e3fa566d005f9a1ec5e6d385",
   adCooldown: 15000
 };
 
