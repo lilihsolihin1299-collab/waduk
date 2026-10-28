@@ -21,13 +21,13 @@ const PENGATURAN = {
       smartlink: "https://uplcm.com/4/11563571"
     },
     {
-      judul: "Judul Drama Episode 2",
+      judul: "TABIB AJAIB",
       deskripsi: "Deskripsi singkat episode 2",
       label: "BARU RILIS",
       durasi: "01:48",
       video: "https://LINK-VIDEO-2.mp4",
-      poster: "",
-      smartlink: "https://SMARTLINK-EPISODE-2"
+      poster: "https://pub-90b5435915404f77b08fdbcb2b3ca36d.r2.dev/tabib_ajaib_600x840.jpg",
+      smartlink: "https://uplcm.com/4/11563571"
     },
     {
       judul: "Judul Drama Episode 3",
@@ -36,7 +36,7 @@ const PENGATURAN = {
       durasi: "02:30",
       video: "https://LINK-VIDEO-3.mp4",
       poster: "",
-      smartlink: "https://SMARTLINK-EPISODE-3"
+      smartlink: "https://uplcm.com/4/11563571"
     }
   ]
 };
