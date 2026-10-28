@@ -1,30 +1,24 @@
 const PENGATURAN = {
-  smartlinkUtama: "https://SMARTLINK-UTAMA",
+  smartlinkUtama: "https://uplcm.com/4/11563571",
 
-  logo:      "https://SMARTLINK-LOGO-DRAMAKU",
-  aplikasi:  "https://LINK-APLIKASI-DRAMA",
-  telegram:  "https://t.me/NAMA_SALURAN",
+  logo:      "https://uplcm.com/4/11563571",
+  aplikasi:  "https://vjjdeyyrulina.com",
+  telegram:  "https://t.me/spesialedition",
 
-  // Smartlink tombol PLAY + berapa kali harus ditekan.
-  // Contoh jumlahKlikPlay: 2 → tekan ke-1 & ke-2 buka smartlink,
-  // lalu saat penonton kembali, video langsung jalan.
-  // Isi 0 kalau mau tanpa iklan.
-  smartlinkPlay: "https://SMARTLINK-PLAY",
+  smartlinkPlay: "https://uplcm.com/4/11563571",
   jumlahKlikPlay: 2,
 
-  // false = buka di tab yang sama (penonton tekan Kembali → video jalan)
-  // true  = buka di tab baru (penonton balik ke tab ini → video jalan)
   bukaTabBaru: false,
 
   episode: [
     {
-      judul: "Judul Drama Episode 1",
+      judul: "PERISAI PANTANG MENYERAH",
       deskripsi: "Deskripsi singkat episode 1",
       label: "TRENDING #1",
       durasi: "02:15",
-      video: "https://LINK-VIDEO-1.mp4",
-      poster: "",                       // gambar sampul (boleh kosong)
-      smartlink: "https://SMARTLINK-EPISODE-1"
+      video: "https://vjjdeyyrulina.com",
+      poster: "https://pub-90b5435915404f77b08fdbcb2b3ca36d.r2.dev/perisai_600x840.jpg",
+      smartlink: "https://uplcm.com/4/11563571"
     },
     {
       judul: "Judul Drama Episode 2",
