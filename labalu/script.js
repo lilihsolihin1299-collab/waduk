@@ -40,7 +40,7 @@ const PENGATURAN = {
     }
   ]
 };
-(function () {
+ (function () {
   const P = PENGATURAN;
   const $ = (id) => document.getElementById(id);
   const layar = document.querySelector(".layar");
@@ -48,11 +48,18 @@ const PENGATURAN = {
   const tombolPlay = $("tombolPlay");
   const tombolSuara = $("tombolSuara");
   const tombolEp = document.querySelectorAll(".ep");
-  const simpan = {
-    ambil(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } },
-    taruh(k, v) { try { sessionStorage.setItem(k, v); } catch (e) {} },
-    hapus(k) { try { sessionStorage.removeItem(k); } catch (e) {} }
-  };
+
+  // tanda di alamat halaman (#ep-1 / #putar-1), tanpa penyimpanan browser
+  function bacaHash() {
+    const m = location.hash.match(/^#(ep|putar)-(\d+)$/);
+    return m ? { jenis: m[1], ep: Number(m[2]) } : null;
+  }
+  function tulisHash(h) {
+    try { history.replaceState(null, "", h ? "#" + h : location.pathname + location.search); } catch (e) {}
+  }
+
+  // hitungan klik play per episode (hilang saat refresh)
+  const klik = {};
 
   const link = (u) => (u && u.trim()) ? u.trim() : P.smartlinkUtama;
 
@@ -66,6 +73,7 @@ const PENGATURAN = {
     }
   }
 
+  // ---------- tombol link biasa ----------
   function pasangLink(id, url) {
     const el = $(id);
     el.href = link(url);
@@ -75,13 +83,13 @@ const PENGATURAN = {
   pasangLink("linkAplikasi", P.aplikasi);
   pasangLink("linkTelegram", P.telegram);
 
-  let ep = Number(simpan.ambil("dramaku_ep")) || 0;
-  if (!P.episode[ep]) ep = 0;
+  // ---------- episode ----------
+  const awal = bacaHash();
+  let ep = (awal && P.episode[awal.ep]) ? awal.ep : 0;
 
   function tampilkanEpisode(i) {
     const d = P.episode[i];
     ep = i;
-    simpan.taruh("dramaku_ep", i);
     $("judul").textContent = d.judul;
     $("deskripsi").textContent = d.deskripsi;
     $("label").textContent = d.label;
@@ -104,9 +112,11 @@ const PENGATURAN = {
   tombolEp.forEach((b, k) => {
     b.addEventListener("click", () => {
       tampilkanEpisode(k);
+      tulisHash("ep-" + k);
       buka(link(P.episode[k].smartlink));
     });
   });
+     // ---------- video ----------
   function hentikanVideo() {
     video.pause();
     video.removeAttribute("src");
@@ -138,23 +148,26 @@ const PENGATURAN = {
     tombolSuara.hidden = true;
     video.play().catch(() => {});
   });
+
+  // tombol PLAY: buka smartlink sebanyak jumlahKlikPlay, lalu video
   tombolPlay.addEventListener("click", () => {
-    const kunci = "dramaku_play_" + ep;
-    const sudah = Number(simpan.ambil(kunci)) || 0;
+    const sudah = klik[ep] || 0;
     const target = Math.max(0, Number(P.jumlahKlikPlay) || 0);
 
     if (sudah < target) {
-      simpan.taruh(kunci, sudah + 1);
-      if (sudah + 1 >= target) simpan.taruh("dramaku_putar", ep);
+      klik[ep] = sudah + 1;
+      if (sudah + 1 >= target) tulisHash("putar-" + ep);
       buka(link(P.smartlinkPlay));
       return;
     }
     putarVideo();
   });
+
+  // saat penonton kembali ke halaman → langsung putar
   function cekKembali() {
-    const tunggu = simpan.ambil("dramaku_putar");
-    if (tunggu !== null && Number(tunggu) === ep) {
-      simpan.hapus("dramaku_putar");
+    const h = bacaHash();
+    if (h && h.jenis === "putar" && h.ep === ep) {
+      tulisHash("ep-" + ep);
       putarVideo();
     }
   }
@@ -162,12 +175,16 @@ const PENGATURAN = {
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") cekKembali();
   });
+
+  // ---------- suka & bagikan ----------
   $("tombolSuka").addEventListener("click", (e) => e.currentTarget.classList.toggle("aktif"));
   $("tombolBagikan").addEventListener("click", () => {
     const data = { title: document.title, url: location.href };
     if (navigator.share) navigator.share(data).catch(() => {});
     else if (navigator.clipboard) navigator.clipboard.writeText(location.href).then(() => alert("Link disalin"));
   });
+
+  // ---------- hemat baterai: animasi berhenti saat tidak terlihat ----------
   if ("IntersectionObserver" in window) {
     const io = new IntersectionObserver((list) => {
       list.forEach((x) => x.target.classList.toggle("diam", !x.isIntersecting));
