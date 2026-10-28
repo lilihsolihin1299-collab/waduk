@@ -16,7 +16,7 @@ const PENGATURAN = {
       deskripsi: "Deskripsi singkat episode 1",
       label: "TRENDING #1",
       durasi: "02:15",
-      video: "https://vjjdeyyrulina.com",
+      video: "https://pub-90b5435915404f77b08fdbcb2b3ca36d.r2.dev/ssstik.io_1793026933527.mp4",
       poster: "https://pub-90b5435915404f77b08fdbcb2b3ca36d.r2.dev/perisai_600x840.jpg",
       smartlink: "https://uplcm.com/4/11563571"
     },
