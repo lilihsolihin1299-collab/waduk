@@ -6,7 +6,7 @@ const PENGATURAN = {
   telegram:  "https://t.me/spesialedition",
 
   smartlinkPlay: "https://uplcm.com/4/11563571",
-  jumlahKlikPlay: 2,
+  jumlahKlikPlay: 1,
 
   bukaTabBaru: false,
 
