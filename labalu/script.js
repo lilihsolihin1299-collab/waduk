@@ -25,17 +25,17 @@ const PENGATURAN = {
       deskripsi: "Deskripsi singkat episode 2",
       label: "BARU RILIS",
       durasi: "01:48",
-      video: "https://LINK-VIDEO-2.mp4",
+      video: "https://pub-90b5435915404f77b08fdbcb2b3ca36d.r2.dev/ssstik.io_1793026993304.mp4",
       poster: "https://pub-90b5435915404f77b08fdbcb2b3ca36d.r2.dev/tabib_ajaib_600x840.jpg",
       smartlink: "https://uplcm.com/4/11563571"
     },
     {
-      judul: "Judul Drama Episode 3",
+      judul: "TERLAHIR UNTUK MENGUASAI",
       deskripsi: "Deskripsi singkat episode 3",
       label: "PALING DITONTON",
       durasi: "02:30",
-      video: "https://LINK-VIDEO-3.mp4",
-      poster: "",
+      video: "https://pub-90b5435915404f77b08fdbcb2b3ca36d.r2.dev/ssstik.io_1793029459677.mp4",
+      poster: "https://pub-90b5435915404f77b08fdbcb2b3ca36d.r2.dev/poster_600x840.jpg",
       smartlink: "https://uplcm.com/4/11563571"
     }
   ]
