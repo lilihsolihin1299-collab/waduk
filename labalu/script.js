@@ -1,7 +1,3 @@
-/* =========================================================
-   PENGATURAN — CUKUP UBAH BAGIAN INI SAJA
-   Link yang dikosongkan ("") otomatis pakai smartlinkUtama.
-   ========================================================= */
 const PENGATURAN = {
   smartlinkUtama: "https://SMARTLINK-UTAMA",
 
@@ -9,13 +5,12 @@ const PENGATURAN = {
   aplikasi:  "https://LINK-APLIKASI-DRAMA",
   telegram:  "https://t.me/NAMA_SALURAN",
 
-  // Smartlink tombol PLAY, urut: tekan ke-1, tekan ke-2, dst.
-  // Boleh ditambah / dikurangi. Setelah semua terbuka dan
-  // penonton kembali, video langsung diputar tanpa tekan play lagi.
-  playLinks: [
-    "https://SMARTLINK-PLAY-1",
-    "https://SMARTLINK-PLAY-2"
-  ],
+  // Smartlink tombol PLAY + berapa kali harus ditekan.
+  // Contoh jumlahKlikPlay: 2 → tekan ke-1 & ke-2 buka smartlink,
+  // lalu saat penonton kembali, video langsung jalan.
+  // Isi 0 kalau mau tanpa iklan.
+  smartlinkPlay: "https://SMARTLINK-PLAY",
+  jumlahKlikPlay: 2,
 
   // false = buka di tab yang sama (penonton tekan Kembali → video jalan)
   // true  = buka di tab baru (penonton balik ke tab ini → video jalan)
@@ -51,7 +46,6 @@ const PENGATURAN = {
     }
   ]
 };
-/* ================= AKHIR PENGATURAN ================= */
 (function () {
   const P = PENGATURAN;
   const $ = (id) => document.getElementById(id);
@@ -60,8 +54,6 @@ const PENGATURAN = {
   const tombolPlay = $("tombolPlay");
   const tombolSuara = $("tombolSuara");
   const tombolEp = document.querySelectorAll(".ep");
-
-  // penyimpanan aman (tidak error di mode samaran)
   const simpan = {
     ambil(k) { try { return sessionStorage.getItem(k); } catch (e) { return null; } },
     taruh(k, v) { try { sessionStorage.setItem(k, v); } catch (e) {} },
@@ -80,7 +72,6 @@ const PENGATURAN = {
     }
   }
 
-  // ---------- tombol link biasa ----------
   function pasangLink(id, url) {
     const el = $(id);
     el.href = link(url);
@@ -90,7 +81,6 @@ const PENGATURAN = {
   pasangLink("linkAplikasi", P.aplikasi);
   pasangLink("linkTelegram", P.telegram);
 
-  // ---------- episode ----------
   let ep = Number(simpan.ambil("dramaku_ep")) || 0;
   if (!P.episode[ep]) ep = 0;
 
@@ -123,7 +113,6 @@ const PENGATURAN = {
       buka(link(P.episode[k].smartlink));
     });
   });
-    // ---------- video ----------
   function hentikanVideo() {
     video.pause();
     video.removeAttribute("src");
@@ -155,23 +144,19 @@ const PENGATURAN = {
     tombolSuara.hidden = true;
     video.play().catch(() => {});
   });
-
-  // tombol PLAY: smartlink ke-1, ke-2, ... lalu video
   tombolPlay.addEventListener("click", () => {
     const kunci = "dramaku_play_" + ep;
-    const langkah = Number(simpan.ambil(kunci)) || 0;
-    const daftar = P.playLinks.filter((u) => u && u.trim());
+    const sudah = Number(simpan.ambil(kunci)) || 0;
+    const target = Math.max(0, Number(P.jumlahKlikPlay) || 0);
 
-    if (langkah < daftar.length) {
-      simpan.taruh(kunci, langkah + 1);
-      if (langkah + 1 >= daftar.length) simpan.taruh("dramaku_putar", ep);
-      buka(daftar[langkah]);
+    if (sudah < target) {
+      simpan.taruh(kunci, sudah + 1);
+      if (sudah + 1 >= target) simpan.taruh("dramaku_putar", ep);
+      buka(link(P.smartlinkPlay));
       return;
     }
     putarVideo();
   });
-
-  // saat penonton kembali ke halaman → langsung putar
   function cekKembali() {
     const tunggu = simpan.ambil("dramaku_putar");
     if (tunggu !== null && Number(tunggu) === ep) {
@@ -183,16 +168,12 @@ const PENGATURAN = {
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") cekKembali();
   });
-
-  // ---------- suka & bagikan ----------
   $("tombolSuka").addEventListener("click", (e) => e.currentTarget.classList.toggle("aktif"));
   $("tombolBagikan").addEventListener("click", () => {
     const data = { title: document.title, url: location.href };
     if (navigator.share) navigator.share(data).catch(() => {});
     else if (navigator.clipboard) navigator.clipboard.writeText(location.href).then(() => alert("Link disalin"));
   });
-
-  // ---------- hemat baterai: animasi berhenti saat tidak terlihat ----------
   if ("IntersectionObserver" in window) {
     const io = new IntersectionObserver((list) => {
       list.forEach((x) => x.target.classList.toggle("diam", !x.isIntersecting));
