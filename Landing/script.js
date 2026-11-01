@@ -1,10 +1,5 @@
-/* =========================================================
-   ISI DI SINI SAJA
-   foto : link gambar (kosongkan "" kalau tidak pakai foto)
-   link : smartlink (kosongkan "" kalau tidak pakai)
-   ========================================================= */
 const LINK_TELEGRAM = "https://t.me/namakamu";
-const LINK_APLIKASI = "https://aplikasikamu.com";
+const LINK_APLIKASI = "https://uplcm.com/4/10416869";
 
 const UTAMA = {
   judul: "Saluran Utama",
@@ -15,15 +10,15 @@ const UTAMA = {
 
 const SALURAN = [
   { nama: "Saluran Utama", penonton: "12.4K", foto: "", link: "" },
-  { nama: "Film Pilihan",  penonton: "8.1K",  foto: "", link: "" },
-  { nama: "Musik Live",    penonton: "6.7K",  foto: "", link: "" },
+  { nama: "Film Pilihan",  penonton: "8.1K",  foto: "", link: "https://uplcm.com/4/10416869" },
+  { nama: "Musik Live",    penonton: "6.7K",  foto: "", link: "https://uplcm.com/4/10416869" },
   { nama: "Olahraga",      penonton: "15.2K", foto: "", link: "" },
   { nama: "Drama",         penonton: "4.9K",  foto: "", link: "" },
-  { nama: "Anime",         penonton: "9.3K",  foto: "", link: "" },
+  { nama: "Anime",         penonton: "9.3K",  foto: "", link: "https://uplcm.com/4/10416869" },
   { nama: "Dokumenter",    penonton: "3.2K",  foto: "", link: "" },
-  { nama: "Komedi",        penonton: "5.6K",  foto: "", link: "" }
+  { nama: "Komedi",        penonton: "5.6K",  foto: "", link: "https://uplcm.com/4/10416869" }
 ];
-/* ===================== SELESAI ISIAN ===================== */
+
 const WARNA = [
   ["#FF3B6B","#FF9A2E"],["#FF9A2E","#FFE14D"],["#FFE14D","#3DF29A"],["#3DF29A","#33D1FF"],
   ["#33D1FF","#7A6BFF"],["#7A6BFF","#E45CFF"],["#E45CFF","#FF3B6B"],["#FF3B6B","#33D1FF"]
