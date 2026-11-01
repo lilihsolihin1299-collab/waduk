@@ -2,10 +2,10 @@ const LINK_TELEGRAM = "https://t.me/spesialedition";
 const LINK_APLIKASI = "https://uplcm.com/4/10416869";
 
 const UTAMA = {
-  judul: "https://vjjdeyyrulina.com/drama",
+  judul: "",
   info:  "CH 01 · 12.4K nonton",
   foto:  "",
-  link:  ""
+  link:  "https://vjjdeyyrulina.com/drama"
 };
 
 const SALURAN = [
