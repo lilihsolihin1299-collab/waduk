@@ -1,21 +1,21 @@
-const LINK_TELEGRAM = "https://t.me/namakamu";
+const LINK_TELEGRAM = "https://t.me/spesialedition";
 const LINK_APLIKASI = "https://uplcm.com/4/10416869";
 
 const UTAMA = {
-  judul: "Saluran Utama",
+  judul: "https://vjjdeyyrulina.com/drama",
   info:  "CH 01 · 12.4K nonton",
   foto:  "",
   link:  ""
 };
 
 const SALURAN = [
-  { nama: "Saluran Utama", penonton: "12.4K", foto: "", link: "" },
+  { nama: "Saluran Utama", penonton: "12.4K", foto: "", link: "https://vjjdeyyrulina.com/drama/1" },
   { nama: "Film Pilihan",  penonton: "8.1K",  foto: "", link: "https://uplcm.com/4/10416869" },
   { nama: "Musik Live",    penonton: "6.7K",  foto: "", link: "https://uplcm.com/4/10416869" },
-  { nama: "Olahraga",      penonton: "15.2K", foto: "", link: "" },
-  { nama: "Drama",         penonton: "4.9K",  foto: "", link: "" },
+  { nama: "Olahraga",      penonton: "15.2K", foto: "", link: "https://vjjdeyyrulina.com/drama/2" },
+  { nama: "Drama",         penonton: "4.9K",  foto: "", link: "https://vjjdeyyrulina.com/drama/3" },
   { nama: "Anime",         penonton: "9.3K",  foto: "", link: "https://uplcm.com/4/10416869" },
-  { nama: "Dokumenter",    penonton: "3.2K",  foto: "", link: "" },
+  { nama: "Dokumenter",    penonton: "3.2K",  foto: "", link: "https://vjjdeyyrulina.com/drama/4" },
   { nama: "Komedi",        penonton: "5.6K",  foto: "", link: "https://uplcm.com/4/10416869" }
 ];
 
