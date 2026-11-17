@@ -121,7 +121,7 @@ function renderGrid(list, el, kosong) {
 /* gambar sampul otomatis dari video kalau link gambar tidak diisi */
 const antrianThumb = [];
 let sedangThumb = 0;
-const MAKS_THUMB = 4;
+const MAKS_THUMB = 10;
 
 function jalankanThumb() {
   while (sedangThumb < MAKS_THUMB && antrianThumb.length) {
@@ -150,7 +150,7 @@ function ambilFrame(box) {
       vid.load();
       res();
     };
-    const t = setTimeout(akhir, 20000);
+    const t = setTimeout(akhir, 2000000);
     vid.addEventListener("loadeddata", () => {
       const d = vid.duration;
       try { vid.currentTime = isFinite(d) && d > 2 ? Math.min(1.5, d / 2) : 0.1; } catch (e) {}
