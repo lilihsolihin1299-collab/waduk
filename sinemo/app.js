@@ -1,68 +1,366 @@
-/* ===== IKLAN SINEMO PLUS ===== */
-(function () {
-  /* ---------- PENGATURAN ---------- */
-  const LINK_SMARTLINK = "https://asiafilm.org/4/1b597d65e3fa566d005f9a1ec5e6d385";
-  const SMARTLINK_SETIAP_DETIK = 60;      // iklan muncul tiap 60 detik menonton
-  const LINK_POPUNDER = "https://abscloud.org/1/7dc0f51577c92b0e7166a7adf63b7a86";
-  const POPUNDER_TUNDA_DETIK = 3;         // popunder dimuat 3 detik setelah sentuhan pertama
+/* ===== SINEMO PLUS ===== */
 
-  const KUNCI = "sp_iklan_detik";
-  const bacaAngka = () => { try { return Number(localStorage.getItem(KUNCI)) || 0; } catch (e) { return 0; } };
-  const tulisAngka = n => { try { localStorage.setItem(KUNCI, String(n)); } catch (e) {} };
+/* ---------- PENGATURAN ---------- */
+const API = "https://hidden-lab-7352.rayyanurfitri1299.workers.dev";   // alamat Worker
 
-  /* ---------- SMARTLINK: SETIAP 1 MENIT MENONTON ---------- */
-  const layar = document.createElement("div");
-  layar.style.cssText = "position:fixed;inset:0;z-index:150;display:none;align-items:center;justify-content:center;" +
-    "padding:24px;background:rgba(0,8,6,.85);font-family:inherit";
-  layar.innerHTML =
-    '<div style="width:100%;max-width:340px;background:#03382b;border:1px solid #00ff9c;box-shadow:0 0 24px rgba(0,255,156,.25);' +
-    'border-radius:22px;padding:24px 18px;text-align:center;color:#ecfdf5">' +
-    '<div style="width:56px;height:56px;margin:0 auto;border-radius:16px;display:grid;place-items:center;' +
-    'background:linear-gradient(135deg,#00ff9c,#00e0ff);box-shadow:0 0 18px rgba(0,255,156,.5)">' +
-    '<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#012a1c" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' +
-    '<rect x="3" y="5" width="18" height="14" rx="3"/><path d="m10 9 5 3-5 3z" fill="#012a1c"/></svg></div>' +
-    '<div style="font-weight:800;font-size:17px;margin-top:14px">Iklan sebentar</div>' +
-    '<div style="font-size:13px;color:#9fe8c8;margin-top:6px;line-height:1.5">' +
-    "Iklan membantu Sinemo Plus tetap gratis. Ketuk tombol di bawah, lalu kembali ke sini untuk lanjut nonton.</div>" +
-    '<button id="ikl-lanjut" style="display:block;width:100%;margin-top:16px;padding:13px;border:0;border-radius:999px;' +
-    'font:inherit;font-weight:800;font-size:15px;background:linear-gradient(90deg,#00ff9c,#00e0ff);color:#012a1c">' +
-    "Buka iklan &amp; lanjut nonton</button></div>";
-  document.body.appendChild(layar);
+/* ---------- ALAT BANTU ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const baca = (k, d) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } };
+const simpan = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
 
-  let diputarSebelum = [];
-  function tampilIklan() {
-    diputarSebelum = Array.from(document.querySelectorAll("video")).filter(v => !v.paused);
-    diputarSebelum.forEach(v => v.pause());
-    layar.style.display = "flex";
+const IK = {
+  play: '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>',
+  bintang: '<svg viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>',
+  kilau: '<svg viewBox="0 0 24 24"><path d="M12 2l2.2 6.6L21 11l-6.8 2.4L12 20l-2.2-6.6L3 11l6.8-2.4z"/></svg>',
+  jam: '<svg class="ik" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>',
+  fav: '<svg class="ik" viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>',
+  eks: '<svg class="ik" viewBox="0 0 24 24"><path d="M12 2l2.2 6.6L21 11l-6.8 2.4L12 20l-2.2-6.6L3 11l6.8-2.4z"/></svg>',
+  chat: '<svg class="ik" viewBox="0 0 24 24"><path d="M4 4h16v11H9l-5 4z"/></svg>',
+  google: '<svg class="ik" viewBox="0 0 24 24"><path d="M20 12.2c0-.6-.1-1.2-.2-1.7H12v3.3h4.5a4 4 0 0 1-1.7 2.6v2.1h2.8c1.6-1.5 2.4-3.7 2.4-6.3z"/><path d="M12 20.5c2.3 0 4.2-.8 5.6-2l-2.8-2.1c-.8.5-1.7.8-2.8.8-2.2 0-4-1.5-4.7-3.4H4.4v2.2a8.5 8.5 0 0 0 7.6 4.5zM7.3 13.8a5 5 0 0 1 0-3.6V8H4.4a8.5 8.5 0 0 0 0 7.6zM12 6.8c1.2 0 2.4.4 3.3 1.3l2.5-2.5A8.5 8.5 0 0 0 4.4 8l2.9 2.2c.7-2 2.5-3.4 4.7-3.4z"/></svg>',
+  hapus: '<svg class="ik" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></svg>',
+  panah: '<svg class="ik panah" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>',
+};
+
+function toast(t) {
+  const e = $("#toast");
+  e.textContent = t;
+  e.classList.add("show");
+  clearTimeout(toast.t);
+  toast.t = setTimeout(() => e.classList.remove("show"), 2600);
+}
+
+/* riwayat & favorit disimpan di HP */
+const favs = () => baca("sp_fav", []);
+const riwayat = () => baca("sp_riwayat", []);
+
+/* ---------- DATA VIDEO ---------- */
+let GRATIS = [], EKS = [];
+const PETA = {};
+
+function pasangData(j) {
+  GRATIS = (j.gratis || []).map(x => ({ id: "g" + x.id, judul: x.judul || "", src: x.src, thumb: x.thumb || "", eks: false }));
+  EKS = (j.eksklusif || []).map(x => ({ id: "e" + x.id, judul: x.judul || "", src: API + "/v/" + x.id, thumb: x.thumb || "", eks: true }));
+  GRATIS.forEach((v, i) => { if (!v.judul) v.judul = "Video " + (GRATIS.length - i); });
+  EKS.forEach((v, i) => { if (!v.judul) v.judul = "Eksklusif " + (EKS.length - i); });
+  Object.keys(PETA).forEach(k => delete PETA[k]);
+  [...GRATIS, ...EKS].forEach(v => PETA[v.id] = v);
+}
+
+async function muatVideo() {
+  const cache = baca("sp_video", null);
+  if (cache) { pasangData(cache); renderSemua(); }
+  try {
+    const r = await fetch(API + "/api/video");
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error || "Gagal memuat video");
+    simpan("sp_video", j);
+    pasangData(j);
+    renderSemua();
+  } catch (e) {
+    if (!cache) {
+      $("#grid-home").innerHTML = '<p class="kosong">Video gagal dimuat. Cek internet lalu buka ulang.</p>';
+      $("#slider").innerHTML = "";
+    }
   }
-  layar.querySelector("#ikl-lanjut").onclick = () => {
-    window.open(LINK_SMARTLINK, "_blank", "noopener");
-    layar.style.display = "none";
-    tulisAngka(0);
-    diputarSebelum.forEach(v => { if (v.isConnected && v.getAttribute("src")) v.play().catch(() => {}); });
-    diputarSebelum = [];
-  };
+}
 
-  setInterval(() => {
-    if (!LINK_SMARTLINK || document.hidden || layar.style.display === "flex") return;
-    const main = document.getElementById("pv");
-    if (!main || main.paused || main.ended || main.readyState < 3) return;
-    const n = bacaAngka() + 1;
-    tulisAngka(n);
-    if (n >= SMARTLINK_SETIAP_DETIK) tampilIklan();
-  }, 1000);
+function renderSemua() {
+  const q = $("#cari").value.trim();
+  if (q) cariVideo(q); else renderHome();
+  renderSlider();
+  if (halaman === "eksklusif") renderEksklusif();
+  if (halaman === "aktivitas") renderAktivitas();
+}
 
-  /* ---------- POPUNDER: SEKALI PER KUNJUNGAN ---------- */
-  if (!LINK_POPUNDER) return;
-  const mulai = () => {
-    document.removeEventListener("pointerdown", mulai, true);
-    setTimeout(() => {
-      const s = document.createElement("script");
-      s.src = LINK_POPUNDER;
-      s.async = true;
-      s.setAttribute("data-cfasync", "false");
-      document.body.appendChild(s);
-    }, POPUNDER_TUNDA_DETIK * 1000);
+/* ---------- KOTAK VIDEO ---------- */
+function kartu(v) {
+  const f = favs().includes(v.id);
+  const gambar = v.thumb ? `<img src="${esc(v.thumb)}" loading="lazy" decoding="async" alt="">` : "";
+  return `<article class="kotak" data-id="${v.id}">
+    <div class="thumb">${gambar}
+      <span class="play">${IK.play}</span>
+      ${v.eks ? `<span class="vip">${IK.kilau}EKSKLUSIF</span>` : ""}
+    </div>
+    <div class="info"><span class="jdl">${esc(v.judul)}</span>
+      <button class="bintang ${f ? "on" : ""}" data-fav="${v.id}" aria-label="Favorit">${IK.bintang}</button>
+    </div>
+  </article>`;
+}
+
+const PER_HALAMAN = 20;
+const sentinelIO = new IntersectionObserver(es => es.forEach(en => {
+  if (!en.isIntersecting) return;
+  const el = en.target.parentElement;
+  sentinelIO.unobserve(en.target);
+  en.target.remove();
+  if (el) muatLagi(el);
+}), { rootMargin: "600px" });
+
+function muatLagi(el) {
+  const next = el._list.slice(el._n, el._n + PER_HALAMAN);
+  el._n += next.length;
+  el.insertAdjacentHTML("beforeend", next.map(kartu).join(""));
+  pasangThumb(el);
+  if (el._n < el._list.length) {
+    const s = document.createElement("div");
+    s.style.cssText = "grid-column:1/-1;height:1px";
+    el.appendChild(s);
+    sentinelIO.observe(s);
+  }
+}
+
+function renderGrid(list, el, kosong) {
+  el._list = list;
+  el._n = 0;
+  el.innerHTML = list.length ? "" : `<p class="kosong">${kosong || "Belum ada video."}</p>`;
+  if (list.length) muatLagi(el);
+}
+
+/* gambar sampul otomatis dari video kalau link gambar tidak diisi */
+const antrianThumb = [];
+let sedangThumb = 0;
+const MAKS_THUMB = 4;
+
+function jalankanThumb() {
+  while (sedangThumb < MAKS_THUMB && antrianThumb.length) {
+    const box = antrianThumb.shift();
+    if (!box.isConnected || box.querySelector("canvas,img")) continue;
+    sedangThumb++;
+    ambilFrame(box).then(() => { sedangThumb--; jalankanThum
+      b(); });
+  }
+    }
+function ambilFrame(box) {
+  return new Promise(res => {
+    const art = box.closest("[data-id]");
+    const v = art && PETA[art.dataset.id];
+    if (!v) return res();
+    const vid = document.createElement("video");
+    vid.muted = true;
+    vid.playsInline = true;
+    vid.preload = "auto";
+    let selesai = false;
+    const akhir = () => {
+      if (selesai) return;
+      selesai = true;
+      clearTimeout(t);
+      vid.removeAttribute("src");
+      vid.load();
+      res();
+    };
+    const t = setTimeout(akhir, 20000);
+    vid.addEventListener("loadeddata", () => {
+      const d = vid.duration;
+      try { vid.currentTime = isFinite(d) && d > 2 ? Math.min(1.5, d / 2) : 0.1; } catch (e) {}
+    });
+    vid.addEventListener("seeked", () => requestAnimationFrame(() => {
+      try {
+        if (vid.videoWidth && box.isConnected) {
+          const c = document.createElement("canvas");
+          c.width = 320;
+          c.height = Math.round(320 * vid.videoHeight / vid.videoWidth) || 200;
+          c.getContext("2d").drawImage(vid, 0, 0, c.width, c.height);
+          box.insertBefore(c, box.firstChild);
+        }
+      } catch (e) {}
+      akhir();
+    }));
+    vid.addEventListener("error", akhir);
+    vid.src = v.src;
+  });
+}
+
+const thumbIO = new IntersectionObserver(es => es.forEach(en => {
+  if (!en.isIntersecting) return;
+  thumbIO.unobserve(en.target);
+  antrianThumb.push(en.target);
+  jalankanThumb();
+}), { rootMargin: "200px" });
+
+function pasangThumb(el) {
+  $$(".thumb", el).forEach(b => {
+    if (!b.querySelector("img") && !b.dataset.pasang) {
+      b.dataset.pasang = "1";
+      thumbIO.observe(b);
+    }
+  });
+}
+
+/* ---------- SLIDER ---------- */
+let sliderTimer = null;
+function renderSlider() {
+  const s = $("#slider"), d = $("#dots"), list = GRATIS.slice(0, 5);
+  clearInterval(sliderTimer);
+  if (!list.length) {
+    s.innerHTML = '<div class="slider-kosong">Video segera hadir</div>';
+    d.innerHTML = "";
+    return;
+  }
+  s.innerHTML = list.map(v => `<div class="slide" data-id="${v.id}">
+    ${v.thumb ? `<img src="${esc(v.thumb)}" alt="">` : ""}
+    <video muted loop playsinline preload="none" data-src="${esc(v.src)}"></video>
+    <div class="slide-info"><div><small>TERBARU</small><b>${esc(v.judul)}</b></div><span class="play-btn">${IK.play}Tonton</span></div></div>`).join("");
+  d.innerHTML = list.map((_, i) => `<i class="${i ? "" : "on"}"></i>`).join("");
+
+  const vids = $$("video", s);
+  let cur = 0;
+  function putar(i) {
+    vids.forEach((v, j) => {
+      if (j === i) {
+        if (!v.getAttribute("src")) v.src = v.dataset.src;
+        v.play().catch(() => {});
+      } else {
+        v.pause();
+        if (v.getAttribute("src")) { v.removeAttribute("src"); v.load(); }
+      }
+    });
+  }
+  s.onscroll = () => {
+    const i = Math.round(s.scrollLeft / s.clientWidth);
+    $$("i", d).forEach((x, j) => x.classList.toggle("on", i === j));
+    if (i !== cur) { cur = i; putar(i); }
   };
-  document.addEventListener("pointerdown", mulai, true);
-})();
+  putar(0);
+  if (list.length < 2) return;
+  sliderTimer = setInterval(() => {
+    if (halaman !== "home" || player.classList.contains("buka") || document.hidden) { vids[cur].pause(); return; }
+    if (vids[cur].paused) vids[cur].play().catch(() => {});
+    s.scrollTo({ left: ((cur + 1) % list.length) * s.clientWidth, behavior: "smooth" });
+  }, 5000);
+}
+
+/* ---------- PEMUTAR ---------- */
+const player = $("#player"), pv = $("#pv");
+let sedang = null;
+
+function bukaVideo(id) {
+  const v = PETA[id];
+  if (!v) return;
+  sedang = v;
+  pv.src = v.src;
+  $("#pjudul").textContent = v.judul;
+  player.classList.add("buka");
+  pv.play().catch(() => {});
+  const r = riwayat().filter(x => x !== id);
+  r.unshift(id);
+  simpan("sp_riwayat", r.slice(0, 50));
+  $("#pfav").classList.toggle("on", favs().includes(v.id));
+}
+
+function tutupVideo() {
+  pv.pause();
+  pv.removeAttribute("src");
+  pv.load();
+  player.classList.remove("buka");
+  sedang = null;
+  if (halaman === "aktivitas") renderAktivitas();
+}
+
+function toggleFav(id) {
+  const f = favs(), i = f.indexOf(id);
+  if (i > -1) f.splice(i, 1); else f.unshift(id);
+  simpan("sp_fav", f);
+  $$(`[data-fav="${id}"]`).forEach(b => b.classList.toggle("on", i === -1));
+  if (sedang && sedang.id === id) $("#pfav").classList.toggle("on", i === -1);
+  toast(i === -1 ? "Ditambahkan ke favorit" : "Dihapus dari favorit");
+  if (halaman === "aktivitas") renderAktivitas();
+}
+document.addEventListener("click", e => {
+  const fb = e.target.closest("[data-fav]");
+  if (fb) { e.stopPropagation(); toggleFav(fb.dataset.fav); return; }
+  const k = e.target.closest("[data-id]");
+  if (k) bukaVideo(k.dataset.id);
+});
+$("#ptutup").onclick = tutupVideo;
+$("#pfav").onclick = () => sedang && toggleFav(sedang.id);
+player.addEventListener("click", e => { if (e.target === player) tutupVideo(); });
+pv.addEventListener("error", () => { if (sedang) toast("Video gagal diputar. Coba lagi sebentar."); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") tutupVideo(); });
+
+/* ---------- NAVIGASI ---------- */
+let halaman = "home";
+function pindah(n) {
+  if (player.classList.contains("buka")) tutupVideo();
+  halaman = n;
+  $$(".page").forEach(p => p.classList.toggle("aktif", p.id === "page-" + n));
+  $$(".bottom button").forEach(b => b.classList.toggle("on", b.dataset.page === n));
+  if (n === "eksklusif") renderEksklusif();
+  if (n === "aktivitas") renderAktivitas();
+  if (n === "akun") renderAkun();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+$$(".bottom button").forEach(b => b.onclick = () => {
+  if (b.dataset.page === "home" && $("#cari").value) { $("#cari").value = ""; renderHome(); }
+  pindah(b.dataset.page);
+});
+
+/* ---------- HOME & CARI ---------- */
+function renderHome() {
+  $("#judul-home").textContent = "Video Terbaru";
+  $("#jumlah").textContent = GRATIS.length + " video";
+  $(".slider-area").hidden = false;
+  renderGrid(GRATIS, $("#grid-home"), "Belum ada video. Nantikan video terbaru di sini.");
+}
+
+function cariVideo(q) {
+  q = q.toLowerCase();
+  const h = [...GRATIS, ...EKS].filter(v => v.judul.toLowerCase().includes(q));
+  $("#judul-home").textContent = "Hasil pencarian";
+  $("#jumlah").textContent = h.length + " video";
+  $(".slider-area").hidden = true;
+  renderGrid(h, $("#grid-home"), "Video tidak ditemukan.");
+}
+
+$("#cari").addEventListener("input", e => {
+  if (halaman !== "home") pindah("home");
+  const q = e.target.value.trim();
+  if (q) cariVideo(q); else renderHome();
+});
+
+/* ---------- EKSKLUSIF ---------- */
+function renderEksklusif() {
+  const el = $("#page-eksklusif");
+  el.innerHTML = `<div class="sec-head" style="margin-top:6px"><h2>${IK.eks}Video Eksklusif</h2><span class="jml">${EKS.length} video</span></div>
+    <div id="grid-eks" class="grid"></div>`;
+  renderGrid(EKS, $("#grid-eks"), "Belum ada video eksklusif.");
+}
+
+/* ---------- AKTIVITAS ---------- */
+function renderAktivitas() {
+  const el = $("#page-aktivitas");
+  const rw = riwayat().map(i => PETA[i]).filter(Boolean);
+  const fv = favs().map(i => PETA[i]).filter(Boolean);
+  el.innerHTML = `<div class="sec-head" style="margin-top:6px"><h2>${IK.jam}Terakhir Ditonton</h2><span class="jml">${rw.length}</span></div><div id="g-rw" class="grid"></div>
+    <div class="sec-head"><h2>${IK.fav}Favorit</h2><span class="jml">${fv.length}</span></div><div id="g-fv" class="grid"></div>`;
+  renderGrid(rw, $("#g-rw"), "Belum ada video yang ditonton.");
+  renderGrid(fv, $("#g-fv"), "Belum ada favorit. Ketuk bintang di video untuk menyimpan.");
+}
+
+/* ---------- AKUN (belum diaktifkan: tombol tampil, tapi belum bisa dipakai) ---------- */
+function renderAkun() {
+  const el = $("#page-akun");
+  el.innerHTML = `<div class="kartu auth nonaktif">
+      <h3 class="tengah">Masuk ke Sinemo Plus</h3>
+      <p class="muted tengah" style="margin-bottom:14px">Fitur akun segera hadir</p>
+      <button class="btn ghost" data-segera>${IK.google}Lanjutkan dengan Google</button>
+      <div class="atau">atau pakai email</div>
+      <div class="tabs"><button class="on" data-segera>Masuk</button><button data-segera>Daftar</button></div>
+      <input type="email" placeholder="Email" disabled>
+      <input type="password" placeholder="Password" disabled>
+      <button class="btn" data-segera>Masuk</button></div>
+    <div class="menu">
+      <button data-segera>${IK.chat}<span>Live Chat Admin</span><span class="segera">Segera</span></button>
+      <button id="m-hapus">${IK.hapus}<span>Hapus Riwayat Tonton</span>${IK.panah}</button></div>`;
+  $$("[data-segera]", el).forEach(b => b.onclick = () => toast("Fitur ini segera hadir"));
+  $("#m-hapus").onclick = () => {
+    if (!confirm("Hapus semua riwayat tontonan?")) return;
+    simpan("sp_riwayat", []);
+    toast("Riwayat dihapus");
+  };
+}
+
+/* ---------- MULAI ---------- */
+renderHome();
+muatVideo();
