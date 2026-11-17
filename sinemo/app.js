@@ -121,53 +121,72 @@ function renderGrid(list, el, kosong) {
 /* gambar sampul otomatis dari video kalau link gambar tidak diisi */
 const antrianThumb = [];
 let sedangThumb = 0;
-const MAKS_THUMB = 10;
+const MAKS_THUMB = 10;               // jumlah video yang diambil gambarnya barengan
+const BATAS_DETIK = 120;              // batas waktu satu percobaan
+const MAKS_COBA = 20;                // coba ulang otomatis sampai 10 kali, setelah itu berhenti
+const JEDA_ULANG_DETIK = 5;         // jeda coba ulang: 10 dtk, lalu 20, 30, dst (makin lama makin jarang)
+
+/* catatan gagal disimpan di HP, per link video (ganti link di admin = dicoba dari awal) */
+const thumbGagal = baca("sp_thumb_gagal", {});
+const simpanGagal = () => simpan("sp_thumb_gagal", thumbGagal);
+const videoDariBox = box => { const art = box.closest("[data-id]"); return art && PETA[art.dataset.id]; };
 
 function jalankanThumb() {
   while (sedangThumb < MAKS_THUMB && antrianThumb.length) {
     const box = antrianThumb.shift();
-    if (!box.isConnected || box.querySelector("canvas,img")) continue;
+    const v = videoDariBox(box);
+    if (!v || !box.isConnected || box.querySelector("canvas,img")) continue;
+    if ((thumbGagal[v.src] || 0) >= MAKS_COBA) continue;
     sedangThumb++;
-    ambilFrame(box).then(() => { sedangThumb--; jalankanThum
-      b(); });
+    ambilFrame(box, v).then(ok => {
+      sedangThumb--;
+      if (ok) {
+        if (thumbGagal[v.src]) { delete thumbGagal[v.src]; simpanGagal(); }
+      } else {
+        const n = (thumbGagal[v.src] || 0) + 1;
+        thumbGagal[v.src] = n;
+        simpanGagal();
+        if (n < MAKS_COBA) setTimeout(() => { antrianThumb.push(box); jalankanThumb(); }, JEDA_ULANG_DETIK * n * 1000);
+      }
+      jalankanThumb();
+    });
   }
-    }
-function ambilFrame(box) {
+}
+
+function ambilFrame(box, v) {
   return new Promise(res => {
-    const art = box.closest("[data-id]");
-    const v = art && PETA[art.dataset.id];
-    if (!v) return res();
     const vid = document.createElement("video");
     vid.muted = true;
     vid.playsInline = true;
     vid.preload = "auto";
     let selesai = false;
-    const akhir = () => {
+    const akhir = ok => {
       if (selesai) return;
       selesai = true;
       clearTimeout(t);
       vid.removeAttribute("src");
       vid.load();
-      res();
+      res(ok);
     };
-    const t = setTimeout(akhir, 2000000);
+    const t = setTimeout(() => akhir(false), BATAS_DETIK * 1000);
     vid.addEventListener("loadeddata", () => {
       const d = vid.duration;
-      try { vid.currentTime = isFinite(d) && d > 2 ? Math.min(1.5, d / 2) : 0.1; } catch (e) {}
+      try { vid.currentTime = isFinite(d) && d > 2 ? Math.min(1.5, d / 2) : 0.1; } catch (e) { akhir(false); }
     });
     vid.addEventListener("seeked", () => requestAnimationFrame(() => {
       try {
-        if (vid.videoWidth && box.isConnected) {
+        if (!vid.videoWidth) return akhir(false);
+        if (box.isConnected) {
           const c = document.createElement("canvas");
           c.width = 320;
           c.height = Math.round(320 * vid.videoHeight / vid.videoWidth) || 200;
           c.getContext("2d").drawImage(vid, 0, 0, c.width, c.height);
           box.insertBefore(c, box.firstChild);
         }
-      } catch (e) {}
-      akhir();
+        akhir(true);
+      } catch (e) { akhir(false); }
     }));
-    vid.addEventListener("error", akhir);
+    vid.addEventListener("error", () => akhir(false));
     vid.src = v.src;
   });
 }
@@ -181,10 +200,11 @@ const thumbIO = new IntersectionObserver(es => es.forEach(en => {
 
 function pasangThumb(el) {
   $$(".thumb", el).forEach(b => {
-    if (!b.querySelector("img") && !b.dataset.pasang) {
-      b.dataset.pasang = "1";
-      thumbIO.observe(b);
-    }
+    if (b.querySelector("img") || b.dataset.pasang) return;
+    const v = videoDariBox(b);
+    if (v && (thumbGagal[v.src] || 0) >= MAKS_COBA) return;
+    b.dataset.pasang = "1";
+    thumbIO.observe(b);
   });
 }
 
