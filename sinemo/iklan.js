@@ -1,6 +1,7 @@
 /* ===== IKLAN SINEMA PLUS =====
    Alur (sama seperti VIDHUB):
-   1. Kotak video dipencet -> video dibuka + smartlink terbuka di tab baru.
+   1. Kotak video dipencet -> pemutar dibuka (video belum jalan) + smartlink terbuka di tab baru.
+      Penonton pencet tombol play di pemutar untuk mulai menonton.
    2. Popunder Monetag baru dimuat saat video pertama kali dibuka (tidak di daftar video). */
 (function () {
   /* ---------- PENGATURAN ---------- */
@@ -24,8 +25,10 @@
 
   window.bukaVideo = function (id) {
     bukaAsli(id);                                   // video dibuka dulu (tombol kembali HP tetap berfungsi)
+    const pv = document.getElementById("pv");
+    if (pv) pv.pause();                             // video tidak jalan otomatis, penonton pencet play sendiri
     window.open(LINK_SMARTLINK, "_blank", "noopener");
     muatPopunder();
   };
 })
-  ();
+   ();
