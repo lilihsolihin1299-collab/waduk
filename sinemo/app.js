@@ -147,7 +147,7 @@ const antrianThumb = [];
 let sedangThumb = 0;
 const MAKS_THUMB = 10;               // jumlah video yang diambil gambarnya barengan
 const BATAS_DETIK = 60;              // batas waktu satu percobaan
-const MAKS_COBA = 10;                // coba ulang otomatis sampai 10 kali, setelah itu berhenti
+const MAKS_COBA = 15;                // coba ulang otomatis sampai 10 kali, setelah itu berhenti
 const JEDA_ULANG_DETIK = 10;         // jeda coba ulang: 10 dtk, lalu 20, 30, dst (makin lama makin jarang)
 
 /* catatan gagal disimpan di HP, per link video (ganti link di admin = dicoba dari awal) */
