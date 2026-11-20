@@ -28,8 +28,6 @@
 <script src="iklan.js?v=5"></script>
 <script>
 /* ===== SINEMA PLUS · HALAMAN VIDEO ===== */
-/* kalau ada error, tampilkan di judul supaya gampang dicek */
-window.addEventListener("error", e => { const j = document.getElementById("vJudul"); if (j && j.textContent === "Memuat video...") j.textContent = "Error: " + e.message; });
 const API = "https://hidden-lab-7352.rayyanurfitri1299.workers.dev";   // harus sama dengan alamat Worker di app.js
 
 const $ = s => document.querySelector(s);
@@ -44,15 +42,6 @@ function toast(t) {
 }
 
 const id = new URLSearchParams(location.search).get("id") || "";
-/* info pengecekan (muncul kecil di bawah video) - hapus 1 baris di bawah ini kalau sudah normal */
-const CEK = false;
-function cek(t) {
-  if (!CEK) return;
-  let el = document.getElementById("vCek");
-  if (!el) { el = document.createElement("pre"); el.id = "vCek"; el.style.cssText = "margin:10px 16px;padding:8px 10px;font-size:11px;white-space:pre-wrap;word-break:break-all;color:#93c5fd;background:rgba(0,0,0,.4);border-radius:8px"; document.querySelector(".video-isi").after(el); }
-  el.textContent += t + "\n";
-}
-cek("id: " + (id || "(kosong)"));
 const vVideo = $("#vVideo"), vTutup = $("#vTutup"), vSuara = $("#vSuara"), vFav = $("#vFav");
 
 /* cari video dari daftar (pakai simpanan dulu biar cepat, lalu ambil terbaru dari Worker) */
@@ -68,15 +57,26 @@ function tampil(v) {
   $("#vLabel").textContent = v.eks ? "EKSKLUSIF" : "SINEMA PLUS";
   document.title = (v.judul || "Video") + " — Sinema Plus";
   if (v.thumb) vVideo.poster = v.thumb;
-  if (!v.src) { cek("link video KOSONG dari worker"); return; }
+  if (!v.src) return;
   if (vVideo.getAttribute("src") !== v.src) vVideo.src = v.src;
 }
 /* tampilkan gambar awal video (biar tidak hitam sebelum diputar) */
+/* layar video ikut bentuk video (tegak / mendatar), tanpa pinggiran hitam */
+function pasLayar() {
+  const w = vVideo.videoWidth, h = vVideo.videoHeight;
+  if (!w || !h) return;
+  const isi = $(".video-isi");
+  const W = Math.min(isi.clientWidth - 32, 720), H = isi.clientHeight - 32;
+  const k = Math.min(W / w, H / h);
+  vVideo.style.aspectRatio = w + " / " + h;
+  vVideo.style.maxHeight = "none";
+  $(".video-layar").style.width = Math.floor(w * k) + "px";
+}
+window.addEventListener("resize", pasLayar);
 vVideo.addEventListener("loadedmetadata", () => {
-  cek("video kebaca: " + vVideo.videoWidth + "x" + vVideo.videoHeight + ", " + Math.round(vVideo.duration || 0) + " detik");
+  pasLayar();
   if (vVideo.paused && !vVideo.currentTime) { try { vVideo.currentTime = 0.1; } catch (e) {} }
 });
-vVideo.addEventListener("error", () => cek("video error: kode " + (vVideo.error ? vVideo.error.code : "?")));
 /* 1) video yang dibawa dari daftar (paling cepat & pasti) */
 let ketemu = null;
 try {
@@ -88,15 +88,13 @@ const linkAlamat = new URLSearchParams(location.search).get("v");
 if (!ketemu && linkAlamat) ketemu = { id, judul: "", src: linkAlamat, thumb: "", eks: id[0] === "e" };
 /* 3) simpanan daftar video */
 if (!ketemu) ketemu = cari(baca("sp_video", null));
-cek("video dibawa: " + (ketemu ? "ya" : "tidak"));
 if (ketemu) tampil(ketemu);
-fetch(API + "/api/video").then(r => { cek("worker: " + r.status); return r.json(); }).then(j => {
+fetch(API + "/api/video").then(r => r.json()).then(j => {
   simpan("sp_video", j);
   const v = cari(j);
-  cek("dari worker: " + (v ? "ketemu" : "tidak ada") + (v ? "\nlink video: " + v.src : ""));
   if (v) { ketemu = v; if (!vVideo.currentTime) tampil(v); }
   else if (!ketemu) { $("#vJudul").textContent = "Video tidak ditemukan"; $("#vTeks").textContent = "Video tidak ditemukan"; }
-}).catch(e => { cek("worker gagal: " + e.message); if (!ketemu) { $("#vJudul").textContent = "Video gagal dimuat"; $("#vTeks").textContent = "Cek internet lalu buka ulang"; } });
+}).catch(() => { if (!ketemu) { $("#vJudul").textContent = "Video gagal dimuat"; $("#vTeks").textContent = "Cek internet lalu buka ulang"; } });
 
 /* video tidak jalan sendiri: penonton pencet play */
 vTutup.addEventListener("click", () => {
@@ -112,7 +110,6 @@ vTutup.addEventListener("click", () => {
 vSuara.addEventListener("click", () => { vVideo.muted = false; vSuara.hidden = true; vVideo.play().catch(() => {}); });
 vVideo.addEventListener("volumechange", () => { if (!vVideo.muted) vSuara.hidden = true; });
 vVideo.addEventListener("error", () => { if (vVideo.getAttribute("src")) toast("Video gagal diputar. Coba lagi sebentar."); });
-vVideo.addEventListener("playing", () => cek("video jalan"));
 
 /* favorit (sama dengan bintang di daftar video) */
 const favs = () => baca("sp_fav", []);
@@ -132,6 +129,5 @@ $("#btnKembali").addEventListener("click", () => {
   if (dariSini && history.length > 1) history.back(); else location.href = "./";
 });
 </script>
-</body
-  >
+</body>
 </html>
