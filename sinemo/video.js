@@ -1,4 +1,6 @@
 /* ===== SINEMA PLUS · HALAMAN VIDEO ===== */
+/* kalau ada error, tampilkan di judul supaya gampang dicek */
+window.addEventListener("error", e => { const j = document.getElementById("vJudul"); if (j && j.textContent === "Memuat video...") j.textContent = "Error: " + e.message; });
 const API = "https://hidden-lab-7352.rayyanurfitri1299.workers.dev";   // harus sama dengan alamat Worker di app.js
 
 const $ = s => document.querySelector(s);
