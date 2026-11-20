@@ -89,33 +89,57 @@ function kartu(v) {
   </article>`;
 }
 
-const PER_HALAMAN = 20;
-const sentinelIO = new IntersectionObserver(es => es.forEach(en => {
-  if (!en.isIntersecting) return;
-  const el = en.target.parentElement;
-  sentinelIO.unobserve(en.target);
-  en.target.remove();
-  if (el) muatLagi(el);
-}), { rootMargin: "600px" });
+/* ---------- NOMOR HALAMAN (1, 2, 3 ...) ---------- */
+const PER_HALAMAN = 30;              // jumlah video per nomor halaman
 
-function muatLagi(el) {
-  const next = el._list.slice(el._n, el._n + PER_HALAMAN);
-  el._n += next.length;
-  el.insertAdjacentHTML("beforeend", next.map(kartu).join(""));
+/* gaya tombol nomor (ikut warna tema di style.css) */
+(function () {
+  const st = document.createElement("style");
+  st.textContent = ".nomor{grid-column:1/-1;display:flex;flex-wrap:wrap;justify-content:center;gap:7px;margin:10px 0 4px}" +
+    ".nomor button{min-width:38px;height:38px;padding:0 10px;border-radius:11px;background:var(--kartu);border:1px solid var(--garis);color:var(--teks);font-weight:800;font-size:14px}" +
+    ".nomor button.on{background:var(--grad);color:var(--gelap);border-color:transparent}" +
+    ".nomor button:disabled{opacity:.35}" +
+    ".nomor span{min-width:20px;height:38px;display:grid;place-items:center;color:var(--redup)}";
+  document.head.appendChild(st);
+})();
+
+/* nomor halaman diingat, jadi pas balik dari video tetap di nomor yang sama */
+const kunciHal = el => "sp_hal_" + el.id;
+function bacaHal(el) { try { return +sessionStorage.getItem(kunciHal(el)) || 1; } catch (e) { return 1; } }
+function simpanHal(el, n) { try { sessionStorage.setItem(kunciHal(el), n); } catch (e) {} }
+function resetHal(el) { try { sessionStorage.removeItem(kunciHal(el)); } catch (e) {} }
+
+function tombolNomor(hal, total) {
+  if (total < 2) return "";
+  const no = [];
+  for (let i = 1; i <= total; i++) {
+    if (i === 1 || i === total || Math.abs(i - hal) <= 1) no.push(i);
+    else if (no[no.length - 1] !== "...") no.push("...");
+  }
+  return `<div class="nomor">
+    <button data-hal="${hal - 1}" ${hal === 1 ? "disabled" : ""} aria-label="Sebelumnya">&lsaquo;</button>
+    ${no.map(i => i === "..." ? "<span>...</span>" : `<button data-hal="${i}" class="${i === hal ? "on" : ""}">${i}</button>`).join("")}
+    <button data-hal="${hal + 1}" ${hal === total ? "disabled" : ""} aria-label="Berikutnya">&rsaquo;</button></div>`;
+}
+
+function tampilHal(el, hal, gulir) {
+  const total = Math.max(1, Math.ceil(el._list.length / PER_HALAMAN));
+  hal = Math.min(Math.max(1, hal), total);
+  simpanHal(el, hal);
+  el.innerHTML = el._list.slice((hal - 1) * PER_HALAMAN, hal * PER_HALAMAN).map(kartu).join("") + tombolNomor(hal, total);
+  $$(".nomor button", el).forEach(b => b.onclick = () => tampilHal(el, +b.dataset.hal, true));
   pasangThumb(el);
-  if (el._n < el._list.length) {
-    const s = document.createElement("div");
-    s.style.cssText = "grid-column:1/-1;height:1px";
-    el.appendChild(s);
-    sentinelIO.observe(s);
+  if (gulir) {
+    const head = el.previousElementSibling || el;
+    const atas = head.getBoundingClientRect().top + window.scrollY - ($(".topbar") ? $(".topbar").offsetHeight : 0) - 8;
+    window.scrollTo({ top: Math.max(0, atas), behavior: "smooth" });
   }
 }
 
 function renderGrid(list, el, kosong) {
   el._list = list;
-  el._n = 0;
-  el.innerHTML = list.length ? "" : `<p class="kosong">${kosong || "Belum ada video."}</p>`;
-  if (list.length) muatLagi(el);
+  if (!list.length) { el.innerHTML = `<p class="kosong">${kosong || "Belum ada video."}</p>`; return; }
+  tampilHal(el, bacaHal(el), false);
 }
 
 /* gambar sampul otomatis dari video kalau link gambar tidak diisi */
@@ -130,6 +154,33 @@ const JEDA_ULANG_DETIK = 10;         // jeda coba ulang: 10 dtk, lalu 20, 30, ds
 const thumbGagal = baca("sp_thumb_gagal", {});
 const simpanGagal = () => simpan("sp_thumb_gagal", thumbGagal);
 const videoDariBox = box => { const art = box.closest("[data-id]"); return art && PETA[art.dataset.id]; };
+
+/* gambar yang sudah berhasil diambil disimpan di HP, jadi pas balik dari video tidak dimuat ulang */
+const MAKS_SIMPAN_GAMBAR = 150;      // jumlah gambar yang disimpan di HP (yang paling lama dihapus)
+let simpananGambar = baca("sp_thumb_simpan", {});
+function simpanGambar(src, data) {
+  delete simpananGambar[src];
+  simpananGambar[src] = data;
+  let k = Object.keys(simpananGambar);
+  while (k.length > MAKS_SIMPAN_GAMBAR) { delete simpananGambar[k.shift()]; }
+  for (let i = 0; i < 5; i++) {
+    try { localStorage.setItem("sp_thumb_simpan", JSON.stringify(simpananGambar)); return; }
+    catch (e) {                      // memori HP penuh: buang separuh yang lama lalu coba lagi
+      k = Object.keys(simpananGambar);
+      if (!k.length) return;
+      k.slice(0, Math.ceil(k.length / 2)).forEach(x => delete simpananGambar[x]);
+    }
+  }
+}
+function pasangGambarSimpanan(box, v) {
+  const data = v && simpananGambar[v.src];
+  if (!data) return false;
+  const img = document.createElement("img");
+  img.alt = "";
+  img.src = data;
+  box.insertBefore(img, box.firstChild);
+  return true;
+}
 
 function jalankanThumb() {
   while (sedangThumb < MAKS_THUMB && antrianThumb.length) {
@@ -153,9 +204,16 @@ function jalankanThumb() {
   }
 }
 
+/* coba dulu dengan izin CORS (gambar bisa disimpan). Kalau server video belum mengizinkan,
+   otomatis pakai cara lama (gambar tetap muncul, tapi tidak tersimpan) */
 function ambilFrame(box, v) {
+  return ambilFrameSekali(box, v, true).then(ok => ok === "cors" ? ambilFrameSekali(box, v, false) : ok);
+}
+
+function ambilFrameSekali(box, v, pakaiCors) {
   return new Promise(res => {
     const vid = document.createElement("video");
+    if (pakaiCors) vid.crossOrigin = "anonymous";
     vid.muted = true;
     vid.playsInline = true;
     vid.preload = "auto";
@@ -182,11 +240,12 @@ function ambilFrame(box, v) {
           c.height = Math.round(320 * vid.videoHeight / vid.videoWidth) || 200;
           c.getContext("2d").drawImage(vid, 0, 0, c.width, c.height);
           box.insertBefore(c, box.firstChild);
+          if (pakaiCors) { try { simpanGambar(v.src, c.toDataURL("image/jpeg", 0.7)); } catch (e) {} }
         }
         akhir(true);
       } catch (e) { akhir(false); }
     }));
-    vid.addEventListener("error", () => akhir(false));
+    vid.addEventListener("error", () => akhir(pakaiCors ? "cors" : false));
     vid.src = v.src;
   });
 }
@@ -202,6 +261,8 @@ function pasangThumb(el) {
   $$(".thumb", el).forEach(b => {
     if (b.querySelector("img") || b.dataset.pasang) return;
     const v = videoDariBox(b);
+    if (b.querySelector("canvas")) return;
+    if (pasangGambarSimpanan(b, v)) return;
     if (v && (thumbGagal[v.src] || 0) >= MAKS_COBA) return;
     b.dataset.pasang = "1";
     thumbIO.observe(b);
@@ -258,7 +319,9 @@ function bukaVideo(id) {
   const r = riwayat().filter(x => x !== id);
   r.unshift(id);
   simpan("sp_riwayat", r.slice(0, 50));
-  location.href = "video.html?id=" + encodeURIComponent(id);
+  /* data video dibawa langsung ke video.html (tidak perlu ambil ulang dari Worker) */
+  try { sessionStorage.setItem("sp_putar", JSON.stringify({ id: v.id, judul: v.judul, src: v.src, thumb: v.thumb, eks: v.eks })); } catch (e) {}
+  location.href = "video.html?id=" + encodeURIComponent(id) + "&v=" + encodeURIComponent(v.src);
 }
 
 function toggleFav(id) {
@@ -303,7 +366,7 @@ window.addEventListener("popstate", e => {
   if ((st.sp || "home") !== halaman) pindah(st.sp || "home", true);
 });
 $$(".bottom button").forEach(b => b.onclick = () => {
-  if (b.dataset.page === "home" && $("#cari").value) { $("#cari").value = ""; renderHome(); }
+  if (b.dataset.page === "home" && $("#cari").value) { $("#cari").value = ""; resetHal($("#grid-home")); renderHome(); }
   pindah(b.dataset.page);
 });
 
@@ -326,6 +389,7 @@ function cariVideo(q) {
 
 $("#cari").addEventListener("input", e => {
   if (halaman !== "home") pindah("home");
+  resetHal($("#grid-home"));
   const q = e.target.value.trim();
   if (q) cariVideo(q); else renderHome();
 });
