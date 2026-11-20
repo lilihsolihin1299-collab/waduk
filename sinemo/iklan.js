@@ -1,34 +1,29 @@
 /* ===== IKLAN SINEMA PLUS =====
    Alur (sama seperti VIDHUB):
-   1. Kotak video dipencet -> pemutar dibuka (video belum jalan) + smartlink terbuka di tab baru.
-      Penonton pencet tombol play di pemutar untuk mulai menonton.
-   2. Popunder Monetag baru dimuat saat video pertama kali dibuka (tidak di daftar video). */
+   1. Di daftar video: video dipencet -> smartlink terbuka di tab baru, lalu pindah ke video.html.
+   2. Di video.html: popunder dimuat, keluar saat penonton pencet play.
+      Halaman daftar video tidak pernah memuat popunder. */
 (function () {
   /* ---------- PENGATURAN ---------- */
   const LINK_SMARTLINK = "https://uplcm.com/4/12287946";
   const ZONA_POPUNDER = "12287947";
 
-  /* ---------- POPUNDER MONETAG (dimuat sekali, saat video dibuka) ---------- */
-  function muatPopunder() {
-    if (document.querySelector('script[data-sinema-popunder="1"]')) return;
+  /* ---------- HALAMAN VIDEO: muat popunder ---------- */
+  if (document.body && document.body.classList.contains("halaman-video")) {
+    if (!ZONA_POPUNDER) return;
     const s = document.createElement("script");
     s.src = "https://al5sm.com/tag.min.js";
     s.async = true;
     s.dataset.zone = ZONA_POPUNDER;
-    s.dataset.sinemaPopunder = "1";
-    (document.body || document.head).appendChild(s);
+    document.body.appendChild(s);
+    return;
   }
 
-  /* ---------- SMARTLINK DI SETIAP TOMBOL PLAY ---------- */
+  /* ---------- DAFTAR VIDEO: smartlink setiap video dipencet ---------- */
   const bukaAsli = window.bukaVideo;
   if (typeof bukaAsli !== "function") return;
-
   window.bukaVideo = function (id) {
-    bukaAsli(id);                                   // video dibuka dulu (tombol kembali HP tetap berfungsi)
-    const pv = document.getElementById("pv");
-    if (pv) pv.pause();                             // video tidak jalan otomatis, penonton pencet play sendiri
-    window.open(LINK_SMARTLINK, "_blank", "noopener");
-    muatPopunder();
+    if (LINK_SMARTLINK) window.open(LINK_SMARTLINK, "_blank", "noopener");
+    bukaAsli(id);
   };
-})
-   ();
+})();
