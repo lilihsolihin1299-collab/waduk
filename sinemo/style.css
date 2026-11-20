@@ -111,3 +111,26 @@ svg{display:block}
 /* ---------- PEMBERITAHUAN ---------- */
 #toast{position:fixed;left:50%;bottom:calc(var(--nav) + 30px + env(safe-area-inset-bottom));transform:translate(-50%,20px);background:#0b2557;border:1px solid var(--neon);padding:10px 16px;border-radius:14px;font-size:13px;opacity:0;pointer-events:none;transition:.25s;z-index:200;max-width:90%;text-align:center;box-shadow:0 0 16px rgba(56,189,248,.3)}
 #toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* ---------- HALAMAN VIDEO (video.html) ---------- */
+body.halaman-video{padding-bottom:0;min-height:100vh;display:flex;flex-direction:column}
+.video-atas{display:flex;align-items:center;gap:12px;padding:10px 14px}
+.kembali{width:42px;height:42px;flex:none;border-radius:12px;border:1px solid var(--garis);background:var(--kartu);display:grid;place-items:center}
+.video-judul{flex:1;min-width:0}
+.video-judul b{display:block;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.video-judul span{display:block;font-size:11px;font-weight:800;letter-spacing:1px;color:var(--neon)}
+#vFav{width:42px;height:42px}
+#vFav svg{width:22px;height:22px}
+.video-isi{flex:1;display:grid;place-items:center;padding:16px}
+.video-layar{position:relative;width:100%;max-width:720px;border-radius:18px;overflow:hidden;background:#000;border:1px solid var(--garis);box-shadow:0 0 40px rgba(56,189,248,.15)}
+.video-layar video{width:100%;max-height:75vh;display:block;background:#000;aspect-ratio:16/9;object-fit:contain}
+.video-tutup{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:rgba(4,14,30,.35);color:#fff}
+.video-tutup[hidden]{display:none}
+.video-play{width:70px;height:70px;border-radius:50%;display:grid;place-items:center;background:var(--grad);box-shadow:0 0 22px rgba(56,189,248,.55)}
+.video-play svg{width:28px;height:28px;fill:var(--gelap);margin-left:3px}
+.video-teks{font-weight:700;font-size:12px;background:rgba(0,0,0,.6);padding:5px 12px;border-radius:99px}
+.suara-btn{position:absolute;left:50%;top:12px;transform:translateX(-50%);z-index:3;display:flex;align-items:center;gap:8px;white-space:nowrap;font-weight:700;font-size:13px;color:#fff;background:rgba(0,0,0,.75);border:1px solid var(--neon);border-radius:99px;padding:9px 16px}
+.suara-btn[hidden]{display:none}
+.suara-btn .ik{width:18px;height:18px}
+body.halaman-video #toast{bottom:calc(24px + env(safe-area-inset
+                                                 -bottom))}
