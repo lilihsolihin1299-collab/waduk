@@ -314,6 +314,8 @@ function renderSlider() {
 
 /* ---------- PEMUTAR (muncul di halaman yang sama) ---------- */
 (function siapkanPemutar() {
+  const lama = document.getElementById("player");
+  if (lama && !(lama.querySelector("#pv") && lama.querySelector("#ptutup") && lama.querySelector("#pjudul") && lama.querySelector("#pfav"))) lama.remove();
   if (!document.getElementById("player")) {
     const d = document.createElement("div");
     d.id = "player"; d.className = "modal";
@@ -444,6 +446,4 @@ $("#cari").addEventListener("input", e => {
 /* ---------- EKSKLUSIF ---------- */
 function renderEksklusif() {
   const el = $("#page-eksklusif");
-  el.innerHTML = `<div class="sec-head" style="margin-top:6px"><h2>${IK.eks}Video Eksklusif</h2><span class="jml">${EKS.length} video</span></div>
-    <div id="grid-eks" class="grid"></div>`;
-  renderGrid(EKS, $("#grid-eks"), "Belum ada video e
+  el.innerHTML = `<div class="sec-head
