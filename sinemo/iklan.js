@@ -1,29 +1,42 @@
 /* ===== IKLAN SINEMA PLUS =====
-   Alur (sama seperti VIDHUB):
-   1. Di daftar video: video dipencet -> smartlink terbuka di tab baru, lalu pindah ke video.html.
-   2. Di video.html: popunder dimuat, keluar saat penonton pencet play.
-      Halaman daftar video tidak pernah memuat popunder. */
-(function () {
-  /* ---------- PENGATURAN ---------- */
-  const LINK_SMARTLINK = "https://uplcm.com/4/12287946";
-  const ZONA_POPUNDER = "12287947";
+   1. Daftar video: video dipencet -> smartlink, lalu pindah ke video.html.
+   2. video.html: play 1 -> popunder, play 2 -> smartlink + video jalan.
+   Mau matiin salah satu iklan? Kosongin jadi "" */
+const SMARTLINK_HALAMAN_AWAL = "https://uplcm.com/4/12287946";
+const POPUNDER_PLAY_1 = "12287947";
+const SMARTLINK_PLAY_2 = "https://uplcm.com/4/12287946";
 
-  /* ---------- HALAMAN VIDEO: muat popunder ---------- */
+(function () {
+  const ada = s => !!(s && String(s).trim());
+  const bukaLink = url => { if (ada(url)) window.open(String(url).trim(), "_blank", "noopener"); };
+
+  /* ---------- HALAMAN VIDEO ---------- */
   if (document.body && document.body.classList.contains("halaman-video")) {
-    if (!ZONA_POPUNDER) return;
-    const s = document.createElement("script");
-    s.src = "https://al5sm.com/tag.min.js";
-    s.async = true;
-    s.dataset.zone = ZONA_POPUNDER;
-    document.body.appendChild(s);
+    if (ada(POPUNDER_PLAY_1)) {
+      const s = document.createElement("script");
+      s.src = "https://al5sm.com/tag.min.js";
+      s.async = true;
+      s.dataset.zone = String(POPUNDER_PLAY_1).trim();
+      document.body.appendChild(s);
+    }
+    let jumlahPlay = 0;
+    window.iklanPlay = function () {
+      jumlahPlay++;
+      if (ada(POPUNDER_PLAY_1) && jumlahPlay === 1) return false;
+      if (ada(SMARTLINK_PLAY_2) && jumlahPlay === (ada(POPUNDER_PLAY_1) ? 2 : 1)) {
+        setTimeout(() => bukaLink(SMARTLINK_PLAY_2), 0);
+      }
+      return true;
+    };
     return;
   }
 
-  /* ---------- DAFTAR VIDEO: smartlink setiap video dipencet ---------- */
+  /* ---------- DAFTAR VIDEO ---------- */
   const bukaAsli = window.bukaVideo;
   if (typeof bukaAsli !== "function") return;
   window.bukaVideo = function (id) {
-    if (LINK_SMARTLINK) window.open(LINK_SMARTLINK, "_blank", "noopener");
+    bukaLink(SMARTLINK_HALAMAN_AWAL);
     bukaAsli(id);
   };
-})();
+})
+   ();
