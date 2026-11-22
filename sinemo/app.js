@@ -250,6 +250,7 @@ function renderSlider() {
     s.scrollTo({ left: ((cur + 1) % list.length) * s.clientWidth, behavior: "smooth" });
   }, 5000);
 }
+
 /* ---------- PEMUTAR ---------- */
 const player = $("#player"), pv = $("#pv");
 let sedang = null;
@@ -261,8 +262,6 @@ function bukaVideo(id) {
   pv.src = v.src;
   $("#pjudul").textContent = v.judul;
   player.classList.add("buka");
-  /* catat di riwayat browser: tombol kembali HP = tutup video, bukan keluar situs */
-  if (!(history.state && history.state.player)) history.pushState({ sp: halaman, player: 1 }, "");
   pv.play().catch(() => {});
   const r = riwayat().filter(x => x !== id);
   r.unshift(id);
@@ -270,15 +269,13 @@ function bukaVideo(id) {
   $("#pfav").classList.toggle("on", favs().includes(v.id));
 }
 
-function tutupVideo(dariKembali) {
-  if (!player.classList.contains("buka")) return;
+function tutupVideo() {
   pv.pause();
   pv.removeAttribute("src");
   pv.load();
   player.classList.remove("buka");
   sedang = null;
   if (halaman === "aktivitas") renderAktivitas();
-  if (dariKembali !== true && history.state && history.state.player) history.back();
 }
 
 function toggleFav(id) {
@@ -290,14 +287,13 @@ function toggleFav(id) {
   toast(i === -1 ? "Ditambahkan ke favorit" : "Dihapus dari favorit");
   if (halaman === "aktivitas") renderAktivitas();
 }
-
 document.addEventListener("click", e => {
   const fb = e.target.closest("[data-fav]");
   if (fb) { e.stopPropagation(); toggleFav(fb.dataset.fav); return; }
   const k = e.target.closest("[data-id]");
   if (k) bukaVideo(k.dataset.id);
 });
-$("#ptutup").onclick = () => tutupVideo();
+$("#ptutup").onclick = tutupVideo;
 $("#pfav").onclick = () => sedang && toggleFav(sedang.id);
 player.addEventListener("click", e => { if (e.target === player) tutupVideo(); });
 pv.addEventListener("error", () => { if (sedang) toast("Video gagal diputar. Coba lagi sebentar."); });
@@ -305,16 +301,8 @@ document.addEventListener("keydown", e => { if (e.key === "Escape") tutupVideo()
 
 /* ---------- NAVIGASI ---------- */
 let halaman = "home";
-function pindah(n, dariKembali) {
-  if (player.classList.contains("buka")) tutupVideo(true);
-  /* tombol kembali HP: dari halaman lain balik ke Home dulu, dari Home baru keluar situs */
-  if (dariKembali !== true && n !== halaman) {
-    const st = history.state || {};
-    if (n === "home") {
-      if (st.sp && st.sp !== "home") { history.back(); return; }
-    } else if (halaman === "home") history.pushState({ sp: n }, "");
-    else history.replaceState({ sp: n }, "");
-  }
+function pindah(n) {
+  if (player.classList.contains("buka")) tutupVideo();
   halaman = n;
   $$(".page").forEach(p => p.classList.toggle("aktif", p.id === "page-" + n));
   $$(".bottom button").forEach(b => b.classList.toggle("on", b.dataset.page === n));
@@ -323,16 +311,11 @@ function pindah(n, dariKembali) {
   if (n === "akun") renderAkun();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
-history.replaceState({ sp: "home" }, "");
-window.addEventListener("popstate", e => {
-  const st = e.state || { sp: "home" };
-  if (!st.player) tutupVideo(true);
-  if ((st.sp || "home") !== halaman) pindah(st.sp || "home", true);
-});
 $$(".bottom button").forEach(b => b.onclick = () => {
   if (b.dataset.page === "home" && $("#cari").value) { $("#cari").value = ""; renderHome(); }
   pindah(b.dataset.page);
 });
+
 /* ---------- HOME & CARI ---------- */
 function renderHome() {
   $("#judul-home").textContent = "Video Terbaru";
