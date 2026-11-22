@@ -25,7 +25,7 @@
 </main>
 
 <div id="toast"></div>
-<script src="iklan.js?v=5"></script>
+<script src="iklan.js?v=6"></script>
 <script>
 /* ===== SINEMA PLUS · HALAMAN VIDEO ===== */
 const API = "https://hidden-lab-7352.rayyanurfitri1299.workers.dev";   // harus sama dengan alamat Worker di app.js
@@ -99,6 +99,7 @@ fetch(API + "/api/video").then(r => r.json()).then(j => {
 /* video tidak jalan sendiri: penonton pencet play */
 vTutup.addEventListener("click", () => {
   if (!vVideo.getAttribute("src")) { toast("Video belum siap"); return; }
+  if (typeof iklanPlay === "function" && !iklanPlay()) return;   // atur iklan di iklan.js
   vTutup.hidden = true;
   vVideo.setAttribute("controls", "");
   vVideo.muted = false;
