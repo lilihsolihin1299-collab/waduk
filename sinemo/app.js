@@ -147,7 +147,7 @@ const antrianThumb = [];
 let sedangThumb = 0;
 const MAKS_THUMB = 10;               // jumlah video yang diambil gambarnya barengan
 const BATAS_DETIK = 60;              // batas waktu satu percobaan
-const MAKS_COBA = 15;                // coba ulang otomatis sampai 10 kali, setelah itu berhenti
+const MAKS_COBA = 10;                // coba ulang otomatis sampai 10 kali, setelah itu berhenti
 const JEDA_ULANG_DETIK = 10;         // jeda coba ulang: 10 dtk, lalu 20, 30, dst (makin lama makin jarang)
 
 /* catatan gagal disimpan di HP, per link video (ganti link di admin = dicoba dari awal) */
@@ -312,23 +312,70 @@ function renderSlider() {
   }, 5000);
 }
 
-/* ---------- BUKA VIDEO (pindah ke halaman video.html) ---------- */
+/* ---------- PEMUTAR (muncul di halaman yang sama) ---------- */
+(function siapkanPemutar() {
+  if (!document.getElementById("player")) {
+    const d = document.createElement("div");
+    d.id = "player"; d.className = "modal";
+    d.innerHTML = '<div class="modal-box"><button id="ptutup" class="x" aria-label="Tutup"><svg class="ik" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>' +
+      '<video id="pv" controls playsinline controlslist="nodownload"></video>' +
+      '<div class="pbar"><b id="pjudul"></b><button id="pfav" class="bintang" aria-label="Favorit"><svg viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg></button></div></div>';
+    document.body.appendChild(d);
+  }
+  if (getComputedStyle(document.getElementById("player")).position !== "fixed") {
+    const st = document.createElement("style");
+    st.textContent = ".modal{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;padding:12px}" +
+      ".modal.buka{display:flex}.modal-box{position:relative;width:100%;max-width:720px;background:var(--bg2,#0b1f3a);border-radius:18px;overflow:hidden;border:1px solid var(--garis,rgba(255,255,255,.15))}" +
+      ".modal-box video{width:100%;max-height:70vh;background:#000;display:block}" +
+      ".x{position:absolute;top:8px;right:8px;z-index:2;width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,.6);display:grid;place-items:center;border:0;color:#fff}" +
+      ".x .ik{width:18px;height:18px}.pbar{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:13px 14px}.pbar b{font-size:15px}";
+    document.head.appendChild(st);
+  }
+})();
+const player = $("#player"), pv = $("#pv");
+let sedang = null;
+
 function bukaVideo(id) {
   const v = PETA[id];
   if (!v) return;
+  sedang = v;
+  pv.src = v.src;
+  $("#pjudul").textContent = v.judul || "";
+  player.classList.add("buka");
+  pv.play().catch(() => {});
   const r = riwayat().filter(x => x !== id);
   r.unshift(id);
   simpan("sp_riwayat", r.slice(0, 50));
-  /* data video dibawa langsung ke video.html (tidak perlu ambil ulang dari Worker) */
-  try { sessionStorage.setItem("sp_putar", JSON.stringify({ id: v.id, judul: v.judul, src: v.src, thumb: v.thumb, eks: v.eks })); } catch (e) {}
-  location.href = "video.html?id=" + encodeURIComponent(id) + "&v=" + encodeURIComponent(v.src);
+  $("#pfav").classList.toggle("on", favs().includes(id));
+  /* tombol kembali HP menutup video dulu */
+  const st = history.state || {};
+  if (!st.video) history.pushState({ sp: halaman, video: id }, "");
 }
+
+function tutupVideo() {
+  pv.pause();
+  pv.removeAttribute("src");
+  pv.load();
+  player.classList.remove("buka");
+  sedang = null;
+  if (halaman === "aktivitas") renderAktivitas();
+}
+/* tombol X / pencet luar video: tutup lewat riwayat biar tombol kembali tetap rapi */
+function tutupLewatTombol() {
+  if ((history.state || {}).video) history.back(); else tutupVideo();
+}
+$("#ptutup").onclick = tutupLewatTombol;
+$("#pfav").onclick = () => sedang && toggleFav(sedang.id);
+player.addEventListener("click", e => { if (e.target === player) tutupLewatTombol(); });
+pv.addEventListener("error", () => { if (sedang && pv.getAttribute("src")) toast("Video gagal diputar. Coba lagi sebentar."); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && player.classList.contains("buka")) tutupLewatTombol(); });
 
 function toggleFav(id) {
   const f = favs(), i = f.indexOf(id);
   if (i > -1) f.splice(i, 1); else f.unshift(id);
   simpan("sp_fav", f);
   $$(`[data-fav="${id}"]`).forEach(b => b.classList.toggle("on", i === -1));
+  if (sedang && sedang.id === id) $("#pfav").classList.toggle("on", i === -1);
   toast(i === -1 ? "Ditambahkan ke favorit" : "Dihapus dari favorit");
   if (halaman === "aktivitas") renderAktivitas();
 }
@@ -339,12 +386,11 @@ document.addEventListener("click", e => {
   const k = e.target.closest("[data-id]");
   if (k) bukaVideo(k.dataset.id);
 });
-/* balik dari halaman video: segarkan bintang favorit & riwayat */
-window.addEventListener("pageshow", e => { if (e.persisted) renderSemua(); });
 
 /* ---------- NAVIGASI ---------- */
 let halaman = "home";
 function pindah(n, dariKembali) {
+  if (player.classList.contains("buka")) tutupVideo();
   /* tombol kembali HP: dari halaman lain balik ke Home dulu, dari Home baru keluar situs */
   if (dariKembali !== true && n !== halaman) {
     const st = history.state || {};
@@ -363,6 +409,7 @@ function pindah(n, dariKembali) {
 }
 window.addEventListener("popstate", e => {
   const st = e.state || { sp: "home" };
+  if (player.classList.contains("buka") && !st.video) { tutupVideo(); if ((st.sp || "home") === halaman) return; }
   if ((st.sp || "home") !== halaman) pindah(st.sp || "home", true);
 });
 $$(".bottom button").forEach(b => b.onclick = () => {
@@ -399,45 +446,4 @@ function renderEksklusif() {
   const el = $("#page-eksklusif");
   el.innerHTML = `<div class="sec-head" style="margin-top:6px"><h2>${IK.eks}Video Eksklusif</h2><span class="jml">${EKS.length} video</span></div>
     <div id="grid-eks" class="grid"></div>`;
-  renderGrid(EKS, $("#grid-eks"), "Belum ada video eksklusif.");
-}
-
-/* ---------- AKTIVITAS ---------- */
-function renderAktivitas() {
-  const el = $("#page-aktivitas");
-  const rw = riwayat().map(i => PETA[i]).filter(Boolean);
-  const fv = favs().map(i => PETA[i]).filter(Boolean);
-  el.innerHTML = `<div class="sec-head" style="margin-top:6px"><h2>${IK.jam}Terakhir Ditonton</h2><span class="jml">${rw.length}</span></div><div id="g-rw" class="grid"></div>
-    <div class="sec-head"><h2>${IK.fav}Favorit</h2><span class="jml">${fv.length}</span></div><div id="g-fv" class="grid"></div>`;
-  renderGrid(rw, $("#g-rw"), "Belum ada video yang ditonton.");
-  renderGrid(fv, $("#g-fv"), "Belum ada favorit. Ketuk bintang di video untuk menyimpan.");
-}
-
-/* ---------- AKUN (belum diaktifkan: tombol tampil, tapi belum bisa dipakai) ---------- */
-function renderAkun() {
-  const el = $("#page-akun");
-  el.innerHTML = `<div class="kartu auth nonaktif">
-      <h3 class="tengah">Masuk ke Sinemo Plus</h3>
-      <p class="muted tengah" style="margin-bottom:14px">Fitur akun segera hadir</p>
-      <button class="btn ghost" data-segera>${IK.google}Lanjutkan dengan Google</button>
-      <div class="atau">atau pakai email</div>
-      <div class="tabs"><button class="on" data-segera>Masuk</button><button data-segera>Daftar</button></div>
-      <input type="email" placeholder="Email" disabled>
-      <input type="password" placeholder="Password" disabled>
-      <button class="btn" data-segera>Masuk</button></div>
-    <div class="menu">
-      <button data-segera>${IK.chat}<span>Live Chat Admin</span><span class="segera">Segera</span></button>
-      <button id="m-hapus">${IK.hapus}<span>Hapus Riwayat Tonton</span>${IK.panah}</button></div>`;
-  $$("[data-segera]", el).forEach(b => b.onclick = () => toast("Fitur ini segera hadir"));
-  $("#m-hapus").onclick = () => {
-    if (!confirm("Hapus semua riwayat tontonan?")) return;
-    simpan("sp_riwayat", []);
-    toast("Riwayat dihapus");
-  };
-}
-
-/* ---------- MULAI ---------- */
-renderHome();
-muatVideo();
-if (history.state && history.state.sp && history.state.sp !== "home") pindah(history.state.sp, true);
-else history.replaceState({ sp: "home" }, "");
+  renderGrid(EKS, $("#grid-eks"), "Belum ada video e
