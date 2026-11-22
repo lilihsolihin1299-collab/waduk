@@ -41,7 +41,7 @@ const PETA = {};
 
 function pasangData(j) {
   GRATIS = (j.gratis || []).map(x => ({ id: "g" + x.id, judul: x.judul || "", src: x.src, thumb: x.thumb || "", eks: false }));
-  EKS = (j.eksklusif || []).map(x => ({ id: "e" + x.id, judul: x.judul || "", src: x.src, thumb: x.thumb || "", eks: true }));
+    EKS = (j.eksklusif || []).map(x => ({ id: "e" + x.id, judul: x.judul || "", src: x.src, thumb: x.thumb || "", eks: true }));
   GRATIS.forEach((v, i) => { if (!v.judul) v.judul = "Video " + (GRATIS.length - i); });
   EKS.forEach((v, i) => { if (!v.judul) v.judul = "Eksklusif " + (EKS.length - i); });
   Object.keys(PETA).forEach(k => delete PETA[k]);
@@ -89,98 +89,47 @@ function kartu(v) {
   </article>`;
 }
 
-/* ---------- NOMOR HALAMAN (1, 2, 3 ...) ---------- */
-const PER_HALAMAN = 30;              // jumlah video per nomor halaman
+const PER_HALAMAN = 20;
+const sentinelIO = new IntersectionObserver(es => es.forEach(en => {
+  if (!en.isIntersecting) return;
+  const el = en.target.parentElement;
+  sentinelIO.unobserve(en.target);
+  en.target.remove();
+  if (el) muatLagi(el);
+}), { rootMargin: "600px" });
 
-/* gaya tombol nomor (ikut warna tema di style.css) */
-(function () {
-  const st = document.createElement("style");
-  st.textContent = ".nomor{grid-column:1/-1;display:flex;flex-wrap:wrap;justify-content:center;gap:7px;margin:10px 0 4px}" +
-    ".nomor button{min-width:38px;height:38px;padding:0 10px;border-radius:11px;background:var(--kartu);border:1px solid var(--garis);color:var(--teks);font-weight:800;font-size:14px}" +
-    ".nomor button.on{background:var(--grad);color:var(--gelap);border-color:transparent}" +
-    ".nomor button:disabled{opacity:.35}" +
-    ".nomor span{min-width:20px;height:38px;display:grid;place-items:center;color:var(--redup)}";
-  document.head.appendChild(st);
-})();
-
-/* nomor halaman diingat, jadi pas balik dari video tetap di nomor yang sama */
-const kunciHal = el => "sp_hal_" + el.id;
-function bacaHal(el) { try { return +sessionStorage.getItem(kunciHal(el)) || 1; } catch (e) { return 1; } }
-function simpanHal(el, n) { try { sessionStorage.setItem(kunciHal(el), n); } catch (e) {} }
-function resetHal(el) { try { sessionStorage.removeItem(kunciHal(el)); } catch (e) {} }
-
-function tombolNomor(hal, total) {
-  if (total < 2) return "";
-  const no = [];
-  for (let i = 1; i <= total; i++) {
-    if (i === 1 || i === total || Math.abs(i - hal) <= 1) no.push(i);
-    else if (no[no.length - 1] !== "...") no.push("...");
-  }
-  return `<div class="nomor">
-    <button data-hal="${hal - 1}" ${hal === 1 ? "disabled" : ""} aria-label="Sebelumnya">&lsaquo;</button>
-    ${no.map(i => i === "..." ? "<span>...</span>" : `<button data-hal="${i}" class="${i === hal ? "on" : ""}">${i}</button>`).join("")}
-    <button data-hal="${hal + 1}" ${hal === total ? "disabled" : ""} aria-label="Berikutnya">&rsaquo;</button></div>`;
-}
-
-function tampilHal(el, hal, gulir) {
-  const total = Math.max(1, Math.ceil(el._list.length / PER_HALAMAN));
-  hal = Math.min(Math.max(1, hal), total);
-  simpanHal(el, hal);
-  el.innerHTML = el._list.slice((hal - 1) * PER_HALAMAN, hal * PER_HALAMAN).map(kartu).join("") + tombolNomor(hal, total);
-  $$(".nomor button", el).forEach(b => b.onclick = () => tampilHal(el, +b.dataset.hal, true));
+function muatLagi(el) {
+  const next = el._list.slice(el._n, el._n + PER_HALAMAN);
+  el._n += next.length;
+  el.insertAdjacentHTML("beforeend", next.map(kartu).join(""));
   pasangThumb(el);
-  if (gulir) {
-    const head = el.previousElementSibling || el;
-    const atas = head.getBoundingClientRect().top + window.scrollY - ($(".topbar") ? $(".topbar").offsetHeight : 0) - 8;
-    window.scrollTo({ top: Math.max(0, atas), behavior: "smooth" });
+  if (el._n < el._list.length) {
+    const s = document.createElement("div");
+    s.style.cssText = "grid-column:1/-1;height:1px";
+    el.appendChild(s);
+    sentinelIO.observe(s);
   }
 }
 
 function renderGrid(list, el, kosong) {
   el._list = list;
-  if (!list.length) { el.innerHTML = `<p class="kosong">${kosong || "Belum ada video."}</p>`; return; }
-  tampilHal(el, bacaHal(el), false);
+  el._n = 0;
+  el.innerHTML = list.length ? "" : `<p class="kosong">${kosong || "Belum ada video."}</p>`;
+  if (list.length) muatLagi(el);
 }
 
 /* gambar sampul otomatis dari video kalau link gambar tidak diisi */
 const antrianThumb = [];
 let sedangThumb = 0;
 const MAKS_THUMB = 10;               // jumlah video yang diambil gambarnya barengan
-const BATAS_DETIK = 60;              // batas waktu satu percobaan
-const MAKS_COBA = 10;                // coba ulang otomatis sampai 10 kali, setelah itu berhenti
-const JEDA_ULANG_DETIK = 10;         // jeda coba ulang: 10 dtk, lalu 20, 30, dst (makin lama makin jarang)
+const BATAS_DETIK = 120;              // batas waktu satu percobaan
+const MAKS_COBA = 20;                // coba ulang otomatis sampai 10 kali, setelah itu berhenti
+const JEDA_ULANG_DETIK = 5;         // jeda coba ulang: 10 dtk, lalu 20, 30, dst (makin lama makin jarang)
 
 /* catatan gagal disimpan di HP, per link video (ganti link di admin = dicoba dari awal) */
 const thumbGagal = baca("sp_thumb_gagal", {});
 const simpanGagal = () => simpan("sp_thumb_gagal", thumbGagal);
 const videoDariBox = box => { const art = box.closest("[data-id]"); return art && PETA[art.dataset.id]; };
-
-/* gambar yang sudah berhasil diambil disimpan di HP, jadi pas balik dari video tidak dimuat ulang */
-const MAKS_SIMPAN_GAMBAR = 150;      // jumlah gambar yang disimpan di HP (yang paling lama dihapus)
-let simpananGambar = baca("sp_thumb_simpan", {});
-function simpanGambar(src, data) {
-  delete simpananGambar[src];
-  simpananGambar[src] = data;
-  let k = Object.keys(simpananGambar);
-  while (k.length > MAKS_SIMPAN_GAMBAR) { delete simpananGambar[k.shift()]; }
-  for (let i = 0; i < 5; i++) {
-    try { localStorage.setItem("sp_thumb_simpan", JSON.stringify(simpananGambar)); return; }
-    catch (e) {                      // memori HP penuh: buang separuh yang lama lalu coba lagi
-      k = Object.keys(simpananGambar);
-      if (!k.length) return;
-      k.slice(0, Math.ceil(k.length / 2)).forEach(x => delete simpananGambar[x]);
-    }
-  }
-}
-function pasangGambarSimpanan(box, v) {
-  const data = v && simpananGambar[v.src];
-  if (!data) return false;
-  const img = document.createElement("img");
-  img.alt = "";
-  img.src = data;
-  box.insertBefore(img, box.firstChild);
-  return true;
-}
 
 function jalankanThumb() {
   while (sedangThumb < MAKS_THUMB && antrianThumb.length) {
@@ -204,16 +153,9 @@ function jalankanThumb() {
   }
 }
 
-/* coba dulu dengan izin CORS (gambar bisa disimpan). Kalau server video belum mengizinkan,
-   otomatis pakai cara lama (gambar tetap muncul, tapi tidak tersimpan) */
 function ambilFrame(box, v) {
-  return ambilFrameSekali(box, v, true).then(ok => ok === "cors" ? ambilFrameSekali(box, v, false) : ok);
-}
-
-function ambilFrameSekali(box, v, pakaiCors) {
   return new Promise(res => {
     const vid = document.createElement("video");
-    if (pakaiCors) vid.crossOrigin = "anonymous";
     vid.muted = true;
     vid.playsInline = true;
     vid.preload = "auto";
@@ -240,12 +182,11 @@ function ambilFrameSekali(box, v, pakaiCors) {
           c.height = Math.round(320 * vid.videoHeight / vid.videoWidth) || 200;
           c.getContext("2d").drawImage(vid, 0, 0, c.width, c.height);
           box.insertBefore(c, box.firstChild);
-          if (pakaiCors) { try { simpanGambar(v.src, c.toDataURL("image/jpeg", 0.7)); } catch (e) {} }
         }
         akhir(true);
       } catch (e) { akhir(false); }
     }));
-    vid.addEventListener("error", () => akhir(pakaiCors ? "cors" : false));
+    vid.addEventListener("error", () => akhir(false));
     vid.src = v.src;
   });
 }
@@ -261,8 +202,6 @@ function pasangThumb(el) {
   $$(".thumb", el).forEach(b => {
     if (b.querySelector("img") || b.dataset.pasang) return;
     const v = videoDariBox(b);
-    if (b.querySelector("canvas")) return;
-    if (pasangGambarSimpanan(b, v)) return;
     if (v && (thumbGagal[v.src] || 0) >= MAKS_COBA) return;
     b.dataset.pasang = "1";
     thumbIO.observe(b);
@@ -306,34 +245,12 @@ function renderSlider() {
   putar(0);
   if (list.length < 2) return;
   sliderTimer = setInterval(() => {
-    if (halaman !== "home" || document.hidden) { vids[cur].pause(); return; }
+    if (halaman !== "home" || player.classList.contains("buka") || document.hidden) { vids[cur].pause(); return; }
     if (vids[cur].paused) vids[cur].play().catch(() => {});
     s.scrollTo({ left: ((cur + 1) % list.length) * s.clientWidth, behavior: "smooth" });
   }, 5000);
 }
-
-/* ---------- PEMUTAR (muncul di halaman yang sama) ---------- */
-(function siapkanPemutar() {
-  const lama = document.getElementById("player");
-  if (lama && !(lama.querySelector("#pv") && lama.querySelector("#ptutup") && lama.querySelector("#pjudul") && lama.querySelector("#pfav"))) lama.remove();
-  if (!document.getElementById("player")) {
-    const d = document.createElement("div");
-    d.id = "player"; d.className = "modal";
-    d.innerHTML = '<div class="modal-box"><button id="ptutup" class="x" aria-label="Tutup"><svg class="ik" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>' +
-      '<video id="pv" controls playsinline controlslist="nodownload"></video>' +
-      '<div class="pbar"><b id="pjudul"></b><button id="pfav" class="bintang" aria-label="Favorit"><svg viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg></button></div></div>';
-    document.body.appendChild(d);
-  }
-  if (getComputedStyle(document.getElementById("player")).position !== "fixed") {
-    const st = document.createElement("style");
-    st.textContent = ".modal{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.92);display:none;align-items:center;justify-content:center;padding:12px}" +
-      ".modal.buka{display:flex}.modal-box{position:relative;width:100%;max-width:720px;background:var(--bg2,#0b1f3a);border-radius:18px;overflow:hidden;border:1px solid var(--garis,rgba(255,255,255,.15))}" +
-      ".modal-box video{width:100%;max-height:70vh;background:#000;display:block}" +
-      ".x{position:absolute;top:8px;right:8px;z-index:2;width:36px;height:36px;border-radius:50%;background:rgba(0,0,0,.6);display:grid;place-items:center;border:0;color:#fff}" +
-      ".x .ik{width:18px;height:18px}.pbar{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:13px 14px}.pbar b{font-size:15px}";
-    document.head.appendChild(st);
-  }
-})();
+/* ---------- PEMUTAR ---------- */
 const player = $("#player"), pv = $("#pv");
 let sedang = null;
 
@@ -342,35 +259,27 @@ function bukaVideo(id) {
   if (!v) return;
   sedang = v;
   pv.src = v.src;
-  $("#pjudul").textContent = v.judul || "";
+  $("#pjudul").textContent = v.judul;
   player.classList.add("buka");
+  /* catat di riwayat browser: tombol kembali HP = tutup video, bukan keluar situs */
+  if (!(history.state && history.state.player)) history.pushState({ sp: halaman, player: 1 }, "");
   pv.play().catch(() => {});
   const r = riwayat().filter(x => x !== id);
   r.unshift(id);
   simpan("sp_riwayat", r.slice(0, 50));
-  $("#pfav").classList.toggle("on", favs().includes(id));
-  /* tombol kembali HP menutup video dulu */
-  const st = history.state || {};
-  if (!st.video) history.pushState({ sp: halaman, video: id }, "");
+  $("#pfav").classList.toggle("on", favs().includes(v.id));
 }
 
-function tutupVideo() {
+function tutupVideo(dariKembali) {
+  if (!player.classList.contains("buka")) return;
   pv.pause();
   pv.removeAttribute("src");
   pv.load();
   player.classList.remove("buka");
   sedang = null;
   if (halaman === "aktivitas") renderAktivitas();
+  if (dariKembali !== true && history.state && history.state.player) history.back();
 }
-/* tombol X / pencet luar video: tutup lewat riwayat biar tombol kembali tetap rapi */
-function tutupLewatTombol() {
-  if ((history.state || {}).video) history.back(); else tutupVideo();
-}
-$("#ptutup").onclick = tutupLewatTombol;
-$("#pfav").onclick = () => sedang && toggleFav(sedang.id);
-player.addEventListener("click", e => { if (e.target === player) tutupLewatTombol(); });
-pv.addEventListener("error", () => { if (sedang && pv.getAttribute("src")) toast("Video gagal diputar. Coba lagi sebentar."); });
-document.addEventListener("keydown", e => { if (e.key === "Escape" && player.classList.contains("buka")) tutupLewatTombol(); });
 
 function toggleFav(id) {
   const f = favs(), i = f.indexOf(id);
@@ -388,11 +297,16 @@ document.addEventListener("click", e => {
   const k = e.target.closest("[data-id]");
   if (k) bukaVideo(k.dataset.id);
 });
+$("#ptutup").onclick = () => tutupVideo();
+$("#pfav").onclick = () => sedang && toggleFav(sedang.id);
+player.addEventListener("click", e => { if (e.target === player) tutupVideo(); });
+pv.addEventListener("error", () => { if (sedang) toast("Video gagal diputar. Coba lagi sebentar."); });
+document.addEventListener("keydown", e => { if (e.key === "Escape") tutupVideo(); });
 
 /* ---------- NAVIGASI ---------- */
 let halaman = "home";
 function pindah(n, dariKembali) {
-  if (player.classList.contains("buka")) tutupVideo();
+  if (player.classList.contains("buka")) tutupVideo(true);
   /* tombol kembali HP: dari halaman lain balik ke Home dulu, dari Home baru keluar situs */
   if (dariKembali !== true && n !== halaman) {
     const st = history.state || {};
@@ -409,16 +323,16 @@ function pindah(n, dariKembali) {
   if (n === "akun") renderAkun();
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
+history.replaceState({ sp: "home" }, "");
 window.addEventListener("popstate", e => {
   const st = e.state || { sp: "home" };
-  if (player.classList.contains("buka") && !st.video) { tutupVideo(); if ((st.sp || "home") === halaman) return; }
+  if (!st.player) tutupVideo(true);
   if ((st.sp || "home") !== halaman) pindah(st.sp || "home", true);
 });
 $$(".bottom button").forEach(b => b.onclick = () => {
-  if (b.dataset.page === "home" && $("#cari").value) { $("#cari").value = ""; resetHal($("#grid-home")); renderHome(); }
+  if (b.dataset.page === "home" && $("#cari").value) { $("#cari").value = ""; renderHome(); }
   pindah(b.dataset.page);
 });
-
 /* ---------- HOME & CARI ---------- */
 function renderHome() {
   $("#judul-home").textContent = "Video Terbaru";
@@ -438,7 +352,6 @@ function cariVideo(q) {
 
 $("#cari").addEventListener("input", e => {
   if (halaman !== "home") pindah("home");
-  resetHal($("#grid-home"));
   const q = e.target.value.trim();
   if (q) cariVideo(q); else renderHome();
 });
@@ -446,4 +359,45 @@ $("#cari").addEventListener("input", e => {
 /* ---------- EKSKLUSIF ---------- */
 function renderEksklusif() {
   const el = $("#page-eksklusif");
-  el.innerHTML = `<div class="sec-head
+  el.innerHTML = `<div class="sec-head" style="margin-top:6px"><h2>${IK.eks}Video Eksklusif</h2><span class="jml">${EKS.length} video</span></div>
+    <div id="grid-eks" class="grid"></div>`;
+  renderGrid(EKS, $("#grid-eks"), "Belum ada video eksklusif.");
+}
+
+/* ---------- AKTIVITAS ---------- */
+function renderAktivitas() {
+  const el = $("#page-aktivitas");
+  const rw = riwayat().map(i => PETA[i]).filter(Boolean);
+  const fv = favs().map(i => PETA[i]).filter(Boolean);
+  el.innerHTML = `<div class="sec-head" style="margin-top:6px"><h2>${IK.jam}Terakhir Ditonton</h2><span class="jml">${rw.length}</span></div><div id="g-rw" class="grid"></div>
+    <div class="sec-head"><h2>${IK.fav}Favorit</h2><span class="jml">${fv.length}</span></div><div id="g-fv" class="grid"></div>`;
+  renderGrid(rw, $("#g-rw"), "Belum ada video yang ditonton.");
+  renderGrid(fv, $("#g-fv"), "Belum ada favorit. Ketuk bintang di video untuk menyimpan.");
+}
+
+/* ---------- AKUN (belum diaktifkan: tombol tampil, tapi belum bisa dipakai) ---------- */
+function renderAkun() {
+  const el = $("#page-akun");
+  el.innerHTML = `<div class="kartu auth nonaktif">
+      <h3 class="tengah">Masuk ke Sinemo Plus</h3>
+      <p class="muted tengah" style="margin-bottom:14px">Fitur akun segera hadir</p>
+      <button class="btn ghost" data-segera>${IK.google}Lanjutkan dengan Google</button>
+      <div class="atau">atau pakai email</div>
+      <div class="tabs"><button class="on" data-segera>Masuk</button><button data-segera>Daftar</button></div>
+      <input type="email" placeholder="Email" disabled>
+      <input type="password" placeholder="Password" disabled>
+      <button class="btn" data-segera>Masuk</button></div>
+    <div class="menu">
+      <button data-segera>${IK.chat}<span>Live Chat Admin</span><span class="segera">Segera</span></button>
+      <button id="m-hapus">${IK.hapus}<span>Hapus Riwayat Tonton</span>${IK.panah}</button></div>`;
+  $$("[data-segera]", el).forEach(b => b.onclick = () => toast("Fitur ini segera hadir"));
+  $("#m-hapus").onclick = () => {
+    if (!confirm("Hapus semua riwayat tontonan?")) return;
+    simpan("sp_riwayat", []);
+    toast("Riwayat dihapus");
+  };
+}
+
+/* ---------- MULAI ---------- */
+renderHome();
+muatVideo();
