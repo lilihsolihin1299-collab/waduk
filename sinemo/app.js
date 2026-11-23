@@ -451,4 +451,19 @@ function renderAkun() {
   };
 }
 
-/* 
+function simpanPosisi() {
+  try { sessionStorage.setItem("sp_posisi", JSON.stringify({ hal: halaman, y: window.scrollY })); } catch (e) {}
+}
+window.addEventListener("pagehide", simpanPosisi);
+document.addEventListener("visibilitychange", () => { if (document.hidden) simpanPosisi(); });
+function balikPosisi() {
+  let p = null;
+  try { p = JSON.parse(sessionStorage.getItem("sp_posisi") || "null"); } catch (e) {}
+  if (!p) return;
+  if (p.hal && p.hal !== "home") pindah(p.hal);
+  setTimeout(() => window.scrollTo({ top: p.y || 0, behavior: "instant" }), 400);
+}
+
+/* ---------- MULAI ---------- */
+renderHome();
+muatVideo().then(balikPosisi);
