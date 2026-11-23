@@ -1,18 +1,29 @@
-/* ===== IKLAN SINEMO PLUS ===== */
+/* ===== IKLAN SINEMA PLUS =====
+   Alur (sama seperti VIDHUB):
+   1. Di daftar video: video dipencet -> smartlink terbuka di tab baru, lalu pindah ke video.html.
+   2. Di video.html: popunder dimuat, keluar saat penonton pencet play.
+      Halaman daftar video tidak pernah memuat popunder. */
 (function () {
   /* ---------- PENGATURAN ---------- */
   const LINK_SMARTLINK = "https://uplcm.com/4/12287946";
+  const ZONA_POPUNDER = "12287947";
 
-  /* ---------- POPUNDER MONETAG (normal: Monetag sendiri yang atur kapan muncul) ---------- */
-  (function(s){s.dataset.zone='12287947',s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')));
+  /* ---------- HALAMAN VIDEO: muat popunder ---------- */
+  if (document.body && document.body.classList.contains("halaman-video")) {
+    if (!ZONA_POPUNDER) return;
+    const s = document.createElement("script");
+    s.src = "https://al5sm.com/tag.min.js";
+    s.async = true;
+    s.dataset.zone = ZONA_POPUNDER;
+    document.body.appendChild(s);
+    return;
+  }
 
-  /* ---------- SMARTLINK DI SETIAP TOMBOL PLAY ----------
-     setiap kali video dipencet: video langsung jalan + smartlink terbuka */
+  /* ---------- DAFTAR VIDEO: smartlink setiap video dipencet ---------- */
   const bukaAsli = window.bukaVideo;
   if (typeof bukaAsli !== "function") return;
-
   window.bukaVideo = function (id) {
-    bukaAsli(id);                                   // video dibuka dulu (tombol kembali HP tetap berfungsi)
-    window.open(LINK_SMARTLINK, "_blank", "noopener");
+    if (LINK_SMARTLINK) window.open(LINK_SMARTLINK, "_blank", "noopener");
+    bukaAsli(id);
   };
 })();
