@@ -23,6 +23,18 @@ function bukaLink(url) {
 
   const sudahBuka = {};
   const jumlahPlay = {};
+  let lanjutkan = false;
+
+  function lanjutPutar() {
+    if (!lanjutkan || document.hidden) return;
+    if (!player.classList.contains("buka") || !pv.getAttribute("src")) { lanjutkan = false; return; }
+    lanjutkan = false;
+    pPlay.hidden = true;
+    pv.setAttribute("controls", "");
+    pv.play().catch(() => { pv.muted = true; pv.play().catch(() => { pPlay.hidden = false; }); });
+  }
+  document.addEventListener("visibilitychange", lanjutPutar);
+  window.addEventListener("focus", lanjutPutar);
 
   window.bukaVideo = function (id) {
     if (!sudahBuka[id]) {
@@ -45,6 +57,7 @@ function bukaLink(url) {
       return;
     }
     if (adaSmartlink && jumlahPlay[id] === (adaPopunder ? 2 : 1)) {
+      lanjutkan = true;
       bukaLink(SMARTLINK_PLAY_2);
     }
   }, true);
