@@ -89,33 +89,46 @@ function kartu(v) {
   </article>`;
 }
 
-const PER_HALAMAN = 20;
-const sentinelIO = new IntersectionObserver(es => es.forEach(en => {
-  if (!en.isIntersecting) return;
-  const el = en.target.parentElement;
-  sentinelIO.unobserve(en.target);
-  en.target.remove();
-  if (el) muatLagi(el);
-}), { rootMargin: "600px" });
+/* ---------- NOMOR HALAMAN (1, 2, 3 ...) ---------- */
+const PER_HALAMAN = 30;              // jumlah video per nomor halaman
 
-function muatLagi(el) {
-  const next = el._list.slice(el._n, el._n + PER_HALAMAN);
-  el._n += next.length;
-  el.insertAdjacentHTML("beforeend", next.map(kartu).join(""));
+/* nomor halaman diingat, jadi pas balik dari iklan tetap di nomor yang sama */
+const kunciHal = el => "sp_hal_" + el.id;
+function bacaHal(el) { try { return +sessionStorage.getItem(kunciHal(el)) || 1; } catch (e) { return 1; } }
+function simpanHal(el, n) { try { sessionStorage.setItem(kunciHal(el), n); } catch (e) {} }
+function resetHal(el) { try { sessionStorage.removeItem(kunciHal(el)); } catch (e) {} }
+
+function tombolNomor(hal, total) {
+  if (total < 2) return "";
+  const no = [];
+  for (let i = 1; i <= total; i++) {
+    if (i === 1 || i === total || Math.abs(i - hal) <= 1) no.push(i);
+    else if (no[no.length - 1] !== "...") no.push("...");
+  }
+  return `<div class="nomor">
+    <button data-hal="${hal - 1}" ${hal === 1 ? "disabled" : ""} aria-label="Sebelumnya">&lsaquo;</button>
+    ${no.map(i => i === "..." ? "<span>...</span>" : `<button data-hal="${i}" class="${i === hal ? "on" : ""}">${i}</button>`).join("")}
+    <button data-hal="${hal + 1}" ${hal === total ? "disabled" : ""} aria-label="Berikutnya">&rsaquo;</button></div>`;
+}
+
+function tampilHal(el, hal, gulir) {
+  const total = Math.max(1, Math.ceil(el._list.length / PER_HALAMAN));
+  hal = Math.min(Math.max(1, hal), total);
+  simpanHal(el, hal);
+  el.innerHTML = el._list.slice((hal - 1) * PER_HALAMAN, hal * PER_HALAMAN).map(kartu).join("") + tombolNomor(hal, total);
+  $$(".nomor button", el).forEach(b => b.onclick = e => { e.stopPropagation(); tampilHal(el, +b.dataset.hal, true); });
   pasangThumb(el);
-  if (el._n < el._list.length) {
-    const s = document.createElement("div");
-    s.style.cssText = "grid-column:1/-1;height:1px";
-    el.appendChild(s);
-    sentinelIO.observe(s);
+  if (gulir) {
+    const head = el.previousElementSibling || el;
+    const atas = head.getBoundingClientRect().top + window.scrollY - $(".topbar").offsetHeight - 8;
+    window.scrollTo({ top: Math.max(0, atas), behavior: "smooth" });
   }
 }
 
 function renderGrid(list, el, kosong) {
   el._list = list;
-  el._n = 0;
-  el.innerHTML = list.length ? "" : `<p class="kosong">${kosong || "Belum ada video."}</p>`;
-  if (list.length) muatLagi(el);
+  if (!list.length) { el.innerHTML = `<p class="kosong">${kosong || "Belum ada video."}</p>`; return; }
+  tampilHal(el, bacaHal(el), false);
 }
 
 /* gambar sampul otomatis dari video kalau link gambar tidak diisi */
@@ -330,7 +343,7 @@ window.addEventListener("popstate", e => {
   if ((st.sp || "home") !== halaman) pindah(st.sp || "home", true);
 });
 $$(".bottom button").forEach(b => b.onclick = () => {
-  if (b.dataset.page === "home" && $("#cari").value) { $("#cari").value = ""; renderHome(); }
+  if (b.dataset.page === "home" && $("#cari").value) { $("#cari").value = ""; resetHal($("#grid-home")); renderHome(); }
   pindah(b.dataset.page);
 });
 /* ---------- HOME & CARI ---------- */
@@ -352,6 +365,7 @@ function cariVideo(q) {
 
 $("#cari").addEventListener("input", e => {
   if (halaman !== "home") pindah("home");
+  resetHal($("#grid-home"));
   const q = e.target.value.trim();
   if (q) cariVideo(q); else renderHome();
 });
@@ -398,6 +412,22 @@ function renderAkun() {
   };
 }
 
+/* ---------- BALIK DARI IKLAN: tetap di posisi yang sama ----------
+   biasanya halaman tidak dimuat ulang. Kalau HP/browser memuat ulang,
+   menu, nomor halaman, dan posisi layar dikembalikan seperti sebelumnya. */
+function simpanPosisi() {
+  try { sessionStorage.setItem("sp_posisi", JSON.stringify({ hal: halaman, y: window.scrollY })); } catch (e) {}
+}
+window.addEventListener("pagehide", simpanPosisi);
+document.addEventListener("visibilitychange", () => { if (document.hidden) simpanPosisi(); });
+function balikPosisi() {
+  let p = null;
+  try { p = JSON.parse(sessionStorage.getItem("sp_posisi") || "null"); } catch (e) {}
+  if (!p) return;
+  if (p.hal && p.hal !== "home") pindah(p.hal);
+  setTimeout(() => window.scrollTo({ top: p.y || 0, behavior: "instant" }), 400);
+}
+
 /* ---------- MULAI ---------- */
 renderHome();
-muatVideo();
+muatVideo().then(balikPosisi);
