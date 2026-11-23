@@ -1,9 +1,5 @@
-/* ===== SINEMO PLUS ===== */
+const API = "https://hidden-lab-7352.rayyanurfitri1299.workers.dev";
 
-/* ---------- PENGATURAN ---------- */
-const API = "https://hidden-lab-7352.rayyanurfitri1299.workers.dev";   // alamat Worker
-
-/* ---------- ALAT BANTU ---------- */
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -31,11 +27,9 @@ function toast(t) {
   toast.t = setTimeout(() => e.classList.remove("show"), 2600);
 }
 
-/* riwayat & favorit disimpan di HP */
 const favs = () => baca("sp_fav", []);
 const riwayat = () => baca("sp_riwayat", []);
 
-/* ---------- DATA VIDEO ---------- */
 let GRATIS = [], EKS = [];
 const PETA = {};
 
@@ -74,7 +68,6 @@ function renderSemua() {
   if (halaman === "aktivitas") renderAktivitas();
 }
 
-/* ---------- KOTAK VIDEO ---------- */
 function kartu(v) {
   const f = favs().includes(v.id);
   const gambar = v.thumb ? `<img src="${esc(v.thumb)}" loading="lazy" decoding="async" alt="">` : "";
@@ -89,10 +82,8 @@ function kartu(v) {
   </article>`;
 }
 
-/* ---------- NOMOR HALAMAN (1, 2, 3 ...) ---------- */
-const PER_HALAMAN = 30;              // jumlah video per nomor halaman
+const PER_HALAMAN = 20;
 
-/* nomor halaman diingat, jadi pas balik dari iklan tetap di nomor yang sama */
 const kunciHal = el => "sp_hal_" + el.id;
 function bacaHal(el) { try { return +sessionStorage.getItem(kunciHal(el)) || 1; } catch (e) { return 1; } }
 function simpanHal(el, n) { try { sessionStorage.setItem(kunciHal(el), n); } catch (e) {} }
@@ -118,7 +109,7 @@ function tampilHal(el, hal, gulir) {
   el.innerHTML = el._list.slice((hal - 1) * PER_HALAMAN, hal * PER_HALAMAN).map(kartu).join("") + tombolNomor(hal, total);
   $$(".nomor button", el).forEach(b => b.onclick = e => { e.stopPropagation(); tampilHal(el, +b.dataset.hal, true); });
   pasangThumb(el);
-  if (gulir) window.scrollTo({ top: 0, behavior: "instant" });   // halaman baru mulai dari paling atas
+  if (gulir) window.scrollTo({ top: 0, behavior: "instant" });
 }
 
 function renderGrid(list, el, kosong) {
@@ -127,16 +118,14 @@ function renderGrid(list, el, kosong) {
   tampilHal(el, bacaHal(el), false);
 }
 
-/* gambar sampul otomatis dari video kalau link gambar tidak diisi */
 const antrianThumb = [];
 let sedangThumb = 0;
-const DI_FB = /FBAN|FBAV|FB_IAB|FBIOS|Instagram/i.test(navigator.userAgent);   // dibuka dari aplikasi Facebook/Instagram
-const MAKS_THUMB = DI_FB ? 2 : 10;   // jumlah video yang diambil gambarnya barengan (di FB dibatasi biar HP gak berat)
-const BATAS_DETIK = 120;              // batas waktu satu percobaan
-const MAKS_COBA = 20;                // coba ulang otomatis sampai 10 kali, setelah itu berhenti
-const JEDA_ULANG_DETIK = 5;         // jeda coba ulang: 10 dtk, lalu 20, 30, dst (makin lama makin jarang)
+const DI_FB = /FBAN|FBAV|FB_IAB|FBIOS|Instagram/i.test(navigator.userAgent);
+const MAKS_THUMB = DI_FB ? 2 : 3;
+const BATAS_DETIK = 20;
+const MAKS_COBA = 3;
+const JEDA_ULANG_DETIK = 5;
 
-/* catatan gagal disimpan di HP, per link video (ganti link di admin = dicoba dari awal) */
 const thumbGagal = baca("sp_thumb_gagal", {});
 const simpanGagal = () => simpan("sp_thumb_gagal", thumbGagal);
 const videoDariBox = box => { const art = box.closest("[data-id]"); return art && PETA[art.dataset.id]; };
@@ -150,7 +139,7 @@ function jalankanThumb() {
     sedangThumb++;
     ambilFrame(box, v).then(ok => {
       sedangThumb--;
-      if (!ok && document.hidden) return;   // dihentikan karena layar ditinggal, bukan gagal
+      if (!ok && document.hidden) return;
       if (ok) {
         if (thumbGagal[v.src]) { delete thumbGagal[v.src]; simpanGagal(); }
       } else {
@@ -165,12 +154,11 @@ function jalankanThumb() {
 }
 
 const videoThumbAktif = new Set();
-/* layar ditinggal (pindah aplikasi / keluar): semua video berhenti biar HP gak berat */
+
 function hentikanSemua() {
   antrianThumb.length = 0;
   videoThumbAktif.forEach(v => { try { v.removeAttribute("src"); v.load(); } catch (e) {} });
   videoThumbAktif.clear();
-  $$("#slider video").forEach(v => { v.pause(); if (v.getAttribute("src")) { v.removeAttribute("src"); v.load(); } });
   if (typeof pv !== "undefined" && pv) pv.pause();
 }
 window.addEventListener("pagehide", hentikanSemua);
@@ -236,7 +224,6 @@ function pasangThumb(el) {
   });
 }
 
-/* ---------- SLIDER ---------- */
 let sliderTimer = null;
 function renderSlider() {
   const s = $("#slider"), d = $("#dots"), list = GRATIS.slice(0, 5);
@@ -247,43 +234,27 @@ function renderSlider() {
     return;
   }
   s.innerHTML = list.map(v => `<div class="slide" data-id="${v.id}">
-    ${v.thumb ? `<img src="${esc(v.thumb)}" alt="">` : ""}
-    <video muted loop playsinline preload="none" data-src="${esc(v.src)}"></video>
+    <div class="thumb slide-thumb">${v.thumb ? `<img src="${esc(v.thumb)}" alt="">` : ""}</div>
     <div class="slide-info"><div><small>TERBARU</small><b>${esc(v.judul)}</b></div><span class="play-btn">${IK.play}Tonton</span></div></div>`).join("");
   d.innerHTML = list.map((_, i) => `<i class="${i ? "" : "on"}"></i>`).join("");
+  pasangThumb(s);
 
-  const vids = $$("video", s);
   let cur = 0;
-  function putar(i) {
-    if (DI_FB) return;                       // di aplikasi FB slider cukup gambar, video gak diputar (biar ringan)
-    vids.forEach((v, j) => {
-      if (j === i) {
-        if (!v.getAttribute("src")) v.src = v.dataset.src;
-        v.play().catch(() => {});
-      } else {
-        v.pause();
-        if (v.getAttribute("src")) { v.removeAttribute("src"); v.load(); }
-      }
-    });
-  }
   s.onscroll = () => {
     const i = Math.round(s.scrollLeft / s.clientWidth);
     $$("i", d).forEach((x, j) => x.classList.toggle("on", i === j));
-    if (i !== cur) { cur = i; putar(i); }
+    cur = i;
   };
-  putar(0);
   if (list.length < 2) return;
   sliderTimer = setInterval(() => {
-    if (halaman !== "home" || player.classList.contains("buka") || document.hidden) { vids[cur].pause(); return; }
-    if (vids[cur].paused) vids[cur].play().catch(() => {});
+    if (halaman !== "home" || player.classList.contains("buka") || document.hidden) return;
     s.scrollTo({ left: ((cur + 1) % list.length) * s.clientWidth, behavior: "smooth" });
   }, 5000);
 }
-/* ---------- PEMUTAR ---------- */
+
 const player = $("#player"), pv = $("#pv");
 let sedang = null;
 
-/* tombol play besar di atas video: video tidak jalan sendiri, penonton pencet play */
 const pPlay = document.createElement("button");
 pPlay.className = "p-play";
 pPlay.setAttribute("aria-label", "Putar video");
@@ -296,7 +267,7 @@ pPlay.addEventListener("click", e => {
   pv.play().catch(() => { pv.muted = true; pv.play().catch(() => { pPlay.hidden = false; }); });
 });
 pv.addEventListener("play", () => { pPlay.hidden = true; pv.setAttribute("controls", ""); });
-/* video dijeda: tombol play bawaan HP disembunyikan, tombol emas muncul lagi */
+
 pv.addEventListener("pause", () => {
   if (!player.classList.contains("buka") || pv.ended) return;
   pv.removeAttribute("controls");
@@ -311,11 +282,11 @@ function bukaVideo(id) {
   pv.src = v.src;
   $("#pjudul").textContent = v.judul;
   player.classList.add("buka");
-  /* catat di riwayat browser: tombol kembali HP = tutup video, bukan keluar situs */
+
   if (!(history.state && history.state.player)) history.pushState({ sp: halaman, player: 1 }, "");
   pv.muted = false;
   pPlay.hidden = false;
-  pv.removeAttribute("controls");          // tombol play bawaan HP disembunyikan, pakai tombol emas
+  pv.removeAttribute("controls");
   const r = riwayat().filter(x => x !== id);
   r.unshift(id);
   simpan("sp_riwayat", r.slice(0, 50));
@@ -355,11 +326,10 @@ player.addEventListener("click", e => { if (e.target === player) tutupVideo(); }
 pv.addEventListener("error", () => { if (sedang) toast("Video gagal diputar. Coba lagi sebentar."); });
 document.addEventListener("keydown", e => { if (e.key === "Escape") tutupVideo(); });
 
-/* ---------- NAVIGASI ---------- */
 let halaman = "home";
 function pindah(n, dariKembali) {
   if (player.classList.contains("buka")) tutupVideo(true);
-  /* tombol kembali HP: dari halaman lain balik ke Home dulu, dari Home baru keluar situs */
+
   if (dariKembali !== true && n !== halaman) {
     const st = history.state || {};
     if (n === "home") {
@@ -385,7 +355,7 @@ $$(".bottom button").forEach(b => b.onclick = () => {
   if (b.dataset.page === "home" && $("#cari").value) { $("#cari").value = ""; resetHal($("#grid-home")); renderHome(); }
   pindah(b.dataset.page);
 });
-/* ---------- HOME & CARI ---------- */
+
 function renderHome() {
   $("#judul-home").textContent = "Video Terbaru";
   $("#jumlah").textContent = GRATIS.length + " video";
@@ -409,7 +379,6 @@ $("#cari").addEventListener("input", e => {
   if (q) cariVideo(q); else renderHome();
 });
 
-/* ---------- EKSKLUSIF ---------- */
 function renderEksklusif() {
   const el = $("#page-eksklusif");
   el.innerHTML = `<div class="sec-head" style="margin-top:6px"><h2>${IK.eks}Video Eksklusif</h2><span class="jml">${EKS.length} video</span></div>
@@ -417,7 +386,6 @@ function renderEksklusif() {
   renderGrid(EKS, $("#grid-eks"), "Belum ada video eksklusif.");
 }
 
-/* ---------- AKTIVITAS ---------- */
 function renderAktivitas() {
   const el = $("#page-aktivitas");
   const rw = riwayat().map(i => PETA[i]).filter(Boolean);
@@ -428,7 +396,6 @@ function renderAktivitas() {
   renderGrid(fv, $("#g-fv"), "Belum ada favorit. Ketuk bintang di video untuk menyimpan.");
 }
 
-/* ---------- AKUN (belum diaktifkan: tombol tampil, tapi belum bisa dipakai) ---------- */
 function renderAkun() {
   const el = $("#page-akun");
   el.innerHTML = `<div class="kartu auth nonaktif">
@@ -464,6 +431,5 @@ function balikPosisi() {
   setTimeout(() => window.scrollTo({ top: p.y || 0, behavior: "instant" }), 400);
 }
 
-/* ---------- MULAI ---------- */
 renderHome();
 muatVideo().then(balikPosisi);
