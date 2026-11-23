@@ -118,11 +118,7 @@ function tampilHal(el, hal, gulir) {
   el.innerHTML = el._list.slice((hal - 1) * PER_HALAMAN, hal * PER_HALAMAN).map(kartu).join("") + tombolNomor(hal, total);
   $$(".nomor button", el).forEach(b => b.onclick = e => { e.stopPropagation(); tampilHal(el, +b.dataset.hal, true); });
   pasangThumb(el);
-  if (gulir) {
-    const head = el.previousElementSibling || el;
-    const atas = head.getBoundingClientRect().top + window.scrollY - $(".topbar").offsetHeight - 8;
-    window.scrollTo({ top: Math.max(0, atas), behavior: "smooth" });
-  }
+  if (gulir) window.scrollTo({ top: 0, behavior: "instant" });   // halaman baru mulai dari paling atas
 }
 
 function renderGrid(list, el, kosong) {
@@ -267,6 +263,19 @@ function renderSlider() {
 const player = $("#player"), pv = $("#pv");
 let sedang = null;
 
+/* tombol play besar di atas video: video tidak jalan sendiri, penonton pencet play */
+const pPlay = document.createElement("button");
+pPlay.className = "p-play";
+pPlay.setAttribute("aria-label", "Putar video");
+pPlay.innerHTML = `<span class="p-play-btn">${IK.play}</span><span class="p-play-teks">Ketuk untuk memutar</span>`;
+pv.insertAdjacentElement("afterend", pPlay);
+pPlay.addEventListener("click", e => {
+  e.stopPropagation();
+  pPlay.hidden = true;
+  pv.play().catch(() => { pv.muted = true; pv.play().catch(() => { pPlay.hidden = false; }); });
+});
+pv.addEventListener("play", () => { pPlay.hidden = true; });
+
 function bukaVideo(id) {
   const v = PETA[id];
   if (!v) return;
@@ -276,7 +285,8 @@ function bukaVideo(id) {
   player.classList.add("buka");
   /* catat di riwayat browser: tombol kembali HP = tutup video, bukan keluar situs */
   if (!(history.state && history.state.player)) history.pushState({ sp: halaman, player: 1 }, "");
-  pv.play().catch(() => {});
+  pv.muted = false;
+  pPlay.hidden = false;
   const r = riwayat().filter(x => x !== id);
   r.unshift(id);
   simpan("sp_riwayat", r.slice(0, 50));
