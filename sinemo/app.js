@@ -130,7 +130,8 @@ function renderGrid(list, el, kosong) {
 /* gambar sampul otomatis dari video kalau link gambar tidak diisi */
 const antrianThumb = [];
 let sedangThumb = 0;
-const MAKS_THUMB = 10;               // jumlah video yang diambil gambarnya barengan
+const DI_FB = /FBAN|FBAV|FB_IAB|FBIOS|Instagram/i.test(navigator.userAgent);   // dibuka dari aplikasi Facebook/Instagram
+const MAKS_THUMB = DI_FB ? 2 : 10;   // jumlah video yang diambil gambarnya barengan (di FB dibatasi biar HP gak berat)
 const BATAS_DETIK = 120;              // batas waktu satu percobaan
 const MAKS_COBA = 20;                // coba ulang otomatis sampai 10 kali, setelah itu berhenti
 const JEDA_ULANG_DETIK = 5;         // jeda coba ulang: 10 dtk, lalu 20, 30, dst (makin lama makin jarang)
@@ -149,6 +150,7 @@ function jalankanThumb() {
     sedangThumb++;
     ambilFrame(box, v).then(ok => {
       sedangThumb--;
+      if (!ok && document.hidden) return;   // dihentikan karena layar ditinggal, bukan gagal
       if (ok) {
         if (thumbGagal[v.src]) { delete thumbGagal[v.src]; simpanGagal(); }
       } else {
@@ -162,9 +164,25 @@ function jalankanThumb() {
   }
 }
 
+const videoThumbAktif = new Set();
+/* layar ditinggal (pindah aplikasi / keluar): semua video berhenti biar HP gak berat */
+function hentikanSemua() {
+  antrianThumb.length = 0;
+  videoThumbAktif.forEach(v => { try { v.removeAttribute("src"); v.load(); } catch (e) {} });
+  videoThumbAktif.clear();
+  $$("#slider video").forEach(v => { v.pause(); if (v.getAttribute("src")) { v.removeAttribute("src"); v.load(); } });
+  if (typeof pv !== "undefined" && pv) pv.pause();
+}
+window.addEventListener("pagehide", hentikanSemua);
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) hentikanSemua();
+  else $$(".thumb[data-pasang]").forEach(b => { if (!b.querySelector("canvas,img") && b.isConnected) { antrianThumb.push(b); } }), jalankanThumb();
+});
+
 function ambilFrame(box, v) {
   return new Promise(res => {
     const vid = document.createElement("video");
+    videoThumbAktif.add(vid);
     vid.muted = true;
     vid.playsInline = true;
     vid.preload = "auto";
@@ -173,6 +191,7 @@ function ambilFrame(box, v) {
       if (selesai) return;
       selesai = true;
       clearTimeout(t);
+      videoThumbAktif.delete(vid);
       vid.removeAttribute("src");
       vid.load();
       res(ok);
@@ -236,6 +255,7 @@ function renderSlider() {
   const vids = $$("video", s);
   let cur = 0;
   function putar(i) {
+    if (DI_FB) return;                       // di aplikasi FB slider cukup gambar, video gak diputar (biar ringan)
     vids.forEach((v, j) => {
       if (j === i) {
         if (!v.getAttribute("src")) v.src = v.dataset.src;
@@ -272,9 +292,17 @@ pv.insertAdjacentElement("afterend", pPlay);
 pPlay.addEventListener("click", e => {
   e.stopPropagation();
   pPlay.hidden = true;
+  pv.setAttribute("controls", "");
   pv.play().catch(() => { pv.muted = true; pv.play().catch(() => { pPlay.hidden = false; }); });
 });
-pv.addEventListener("play", () => { pPlay.hidden = true; });
+pv.addEventListener("play", () => { pPlay.hidden = true; pv.setAttribute("controls", ""); });
+/* video dijeda: tombol play bawaan HP disembunyikan, tombol emas muncul lagi */
+pv.addEventListener("pause", () => {
+  if (!player.classList.contains("buka") || pv.ended) return;
+  pv.removeAttribute("controls");
+  pPlay.hidden = false;
+});
+pv.addEventListener("ended", () => { pv.removeAttribute("controls"); pPlay.hidden = false; });
 
 function bukaVideo(id) {
   const v = PETA[id];
@@ -287,6 +315,7 @@ function bukaVideo(id) {
   if (!(history.state && history.state.player)) history.pushState({ sp: halaman, player: 1 }, "");
   pv.muted = false;
   pPlay.hidden = false;
+  pv.removeAttribute("controls");          // tombol play bawaan HP disembunyikan, pakai tombol emas
   const r = riwayat().filter(x => x !== id);
   r.unshift(id);
   simpan("sp_riwayat", r.slice(0, 50));
@@ -422,22 +451,4 @@ function renderAkun() {
   };
 }
 
-/* ---------- BALIK DARI IKLAN: tetap di posisi yang sama ----------
-   biasanya halaman tidak dimuat ulang. Kalau HP/browser memuat ulang,
-   menu, nomor halaman, dan posisi layar dikembalikan seperti sebelumnya. */
-function simpanPosisi() {
-  try { sessionStorage.setItem("sp_posisi", JSON.stringify({ hal: halaman, y: window.scrollY })); } catch (e) {}
-}
-window.addEventListener("pagehide", simpanPosisi);
-document.addEventListener("visibilitychange", () => { if (document.hidden) simpanPosisi(); });
-function balikPosisi() {
-  let p = null;
-  try { p = JSON.parse(sessionStorage.getItem("sp_posisi") || "null"); } catch (e) {}
-  if (!p) return;
-  if (p.hal && p.hal !== "home") pindah(p.hal);
-  setTimeout(() => window.scrollTo({ top: p.y || 0, behavior: "instant" }), 400);
-}
-
-/* ---------- MULAI ---------- */
-renderHome();
-muatVideo().then(balikPosisi);
+/* 
