@@ -26,9 +26,9 @@ const ZONA_POPUNDER = "12287947";
     const n = (hitung[id] || 0) + 1;
     hitung[id] = n;
     simpanHitung();
-    if (n <= 2 && LINK_SMARTLINK) window.open(LINK_SMARTLINK, "_blank", "noopener");
     bukaAsli(id);
-    muatPopunder();
+    if (n <= 2 && LINK_SMARTLINK) window.open(LINK_SMARTLINK, "_blank", "noopener");
+    setTimeout(muatPopunder, 0);
   };
 }
 )();
