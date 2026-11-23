@@ -7,26 +7,6 @@ input{font:inherit}
 svg{display:block}
 .ik{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
 
-/* ---------- ATAS ---------- */
-.topbar{position:sticky;top:0;z-index:30;padding:12px 14px 10px;background:rgba(8,8,8,.9);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--garis)}
-.brand{display:flex;align-items:center;gap:9px;margin-bottom:10px}
-.logo{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:var(--grad);color:var(--gelap);font-weight:900;font-size:19px;box-shadow:0 0 16px rgba(245,197,66,.5)}
-.brand-text{font-size:21px;font-weight:900;letter-spacing:.5px}
-.brand-text b{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent}
-.cari{position:relative}
-.cari .ik{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--redup)}
-.cari input{width:100%;padding:11px 16px 11px 42px;border-radius:999px;border:1px solid var(--garis);background:rgba(255,255,255,.05);color:var(--teks);outline:none}
-.cari input::placeholder{color:#78716c}
-:root{--bg:#050505;--bg2:#121212;--kartu:rgba(255,255,255,.055);--garis:rgba(255,255,255,.11);--neon:#f5c542;--neon2:#ffd978;--teks:#f5f5f4;--redup:#a8a29e;--gelap:#0a0a0a;--nav:66px;--grad:linear-gradient(90deg,#f5c542,#ffd978)}
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html{background:var(--bg)}
-body{background:radial-gradient(120% 55% at 15% -8%,#2b2410 0%,#121212 42%,#050505 100%) fixed var(--bg);color:var(--teks);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100vh;padding-bottom:calc(var(--nav) + 28px + env(safe-area-inset-bottom))}
-button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
-input{font:inherit}
-svg{display:block}
-.ik{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
-
-/* ---------- ATAS ---------- */
 .topbar{position:sticky;top:0;z-index:30;padding:12px 14px 10px;background:rgba(8,8,8,.9);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--garis)}
 .brand{display:flex;align-items:center;gap:9px;margin-bottom:10px}
 .logo{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:var(--grad);color:var(--gelap);font-weight:900;font-size:19px;box-shadow:0 0 16px rgba(245,197,66,.5)}
@@ -38,7 +18,6 @@ svg{display:block}
 .cari input::placeholder{color:#78716c}
 .cari input:focus{border-color:var(--neon);box-shadow:0 0 0 3px rgba(245,197,66,.15)}
 
-/* ---------- HALAMAN ---------- */
 .page{display:none;padding:14px 14px 0}
 .page.aktif{display:block;animation:muncul .25s}
 @keyframes muncul{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -48,7 +27,6 @@ svg{display:block}
 .muted{color:var(--redup);font-size:13px}
 .jml{font-size:12px;color:var(--redup);background:var(--kartu);border:1px solid var(--garis);padding:4px 10px;border-radius:99px}
 
-/* ---------- SLIDER ---------- */
 .slider{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;border-radius:20px;scrollbar-width:none;border:1px solid var(--garis);box-shadow:0 10px 30px rgba(0,0,0,.35)}
 .slider::-webkit-scrollbar{display:none}
 .slide{flex:0 0 100%;scroll-snap-align:center;position:relative;aspect-ratio:16/9;background:linear-gradient(135deg,#1c1c1c,#070707);cursor:pointer;overflow:hidden}
@@ -61,9 +39,10 @@ svg{display:block}
 .dots{display:flex;justify-content:center;gap:6px;margin-top:10px}
 .dots i{width:7px;height:7px;border-radius:99px;background:#3a3a3a;transition:.25s}
 .dots i.on{width:22px;background:var(--grad)}
+.slide .slide-thumb{position:absolute;inset:0;aspect-ratio:auto}
+.slide .slide-thumb:after{display:none}
 .slider-kosong{aspect-ratio:16/9;border-radius:20px;border:1px dashed var(--garis);display:grid;place-items:center;text-align:center;padding:20px;color:var(--redup)}
 
-/* ---------- KOTAK VIDEO ---------- */
 .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
 @media(min-width:700px){.grid{grid-template-columns:repeat(4,1fr)}}
 .kotak{background:var(--kartu);border:1px solid var(--garis);border-radius:16px;overflow:hidden;cursor:pointer;transition:transform .15s,border-color .15s}
@@ -82,7 +61,6 @@ svg{display:block}
 .bintang.on{color:var(--neon);filter:drop-shadow(0 0 5px rgba(245,197,66,.7))}
 .kosong{grid-column:1/-1;color:var(--redup);text-align:center;padding:22px 10px;font-size:14px;background:var(--kartu);border:1px dashed var(--garis);border-radius:14px}
 
-/* ---------- PEMUTAR ---------- */
 .modal{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.94);display:none;align-items:center;justify-content:center;padding:12px}
 .modal.buka{display:flex}
 .modal-box{position:relative;width:100%;max-width:720px;background:#141414;border-radius:18px;overflow:hidden;border:1px solid var(--garis);box-shadow:0 0 40px rgba(245,197,66,.15)}
@@ -98,13 +76,11 @@ svg{display:block}
 .p-play-btn svg{width:28px;height:28px;fill:var(--gelap);margin-left:3px}
 .p-play-teks{font-weight:700;font-size:12px;background:rgba(0,0,0,.6);padding:5px 12px;border-radius:99px}
 
-/* ---------- MENU BAWAH ---------- */
 .bottom{position:fixed;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:50;display:flex;height:var(--nav);padding:6px;background:rgba(20,20,20,.94);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid var(--garis);border-radius:22px;box-shadow:0 10px 30px rgba(0,0,0,.45)}
 .bottom button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;font-weight:600;color:var(--redup);border-radius:16px;transition:.2s}
 .bottom .ik{width:22px;height:22px}
 .bottom button.on{color:var(--gelap);background:var(--grad);box-shadow:0 0 16px rgba(245,197,66,.45)}
 
-/* ---------- TOMBOL & KARTU ---------- */
 .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:13px;border-radius:14px;font-weight:800;background:var(--grad);color:var(--gelap);margin-top:12px;box-shadow:0 0 14px rgba(245,197,66,.35)}
 .btn.ghost{background:var(--kartu);color:var(--teks);border:1px solid var(--garis);box-shadow:none}
 .btn:disabled{opacity:.6}
@@ -112,7 +88,6 @@ svg{display:block}
 .tengah{text-align:center}
 .kartu h3{font-size:16px;margin-bottom:4px}
 
-/* ---------- AKUN ---------- */
 .auth input{width:100%;padding:12px 14px;margin-top:10px;border-radius:12px;border:1px solid var(--garis);background:rgba(255,255,255,.05);color:var(--teks);outline:none}
 .auth input:focus{border-color:var(--neon)}
 .auth input::placeholder{color:#78716c}
@@ -132,11 +107,9 @@ svg{display:block}
 .menu button .panah{width:16px;height:16px;color:var(--redup)}
 .segera{flex:none!important;font-size:11px;font-weight:800;color:var(--gelap);background:var(--grad);padding:3px 9px;border-radius:99px}
 
-/* ---------- PEMBERITAHUAN ---------- */
 #toast{position:fixed;left:50%;bottom:calc(var(--nav) + 30px + env(safe-area-inset-bottom));transform:translate(-50%,20px);background:#1a1a1a;border:1px solid var(--neon);padding:10px 16px;border-radius:14px;font-size:13px;opacity:0;pointer-events:none;transition:.25s;z-index:200;max-width:90%;text-align:center;box-shadow:0 0 16px rgba(245,197,66,.3)}
 #toast.show{opacity:1;transform:translate(-50%,0)}
 
-/* ---------- NOMOR HALAMAN ---------- */
 .nomor{grid-column:1/-1;display:flex;flex-wrap:wrap;justify-content:center;gap:7px;margin:10px 0 4px}
 .nomor button{min-width:38px;height:38px;padding:0 10px;border-radius:11px;background:var(--kartu);border:1px solid var(--garis);color:var(--teks);font-weight:800;font-size:14px}
 .nomor button.on{background:var(--grad);color:var(--gelap);border-color:transparent;box-shadow:0 0 14px rgba(245,197,66,.35)}
