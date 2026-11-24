@@ -4,9 +4,10 @@ const SMARTLINK_PLAY_2 = "https://uplcm.com/4/12287946";
 
 (function () {
   let popunderDimuat = false;
-  let perluLanjut = false;
+  let mauMain = false;
   let ulang = null;
   let tenang = 0;
+  let waktuSembunyi = -10000;
   const sudahAwal = {};
   const sudahPlay2 = {};
 
@@ -28,6 +29,7 @@ const SMARTLINK_PLAY_2 = "https://uplcm.com/4/12287946";
   if (typeof bukaAsli !== "function") return;
 
   window.bukaVideo = function (id) {
+    mauMain = false;
     bukaAsli(id);
     if (!sudahAwal[id]) {
       sudahAwal[id] = true;
@@ -39,22 +41,23 @@ const SMARTLINK_PLAY_2 = "https://uplcm.com/4/12287946";
   document.addEventListener("click", function (e) {
     const tombol = e.target.closest(".p-play");
     if (!tombol || !sedang) return;
+    mauMain = true;
     const id = sedang.id;
     if (!sudahPlay2[id]) {
       sudahPlay2[id] = true;
-      perluLanjut = true;
       bukaLink(SMARTLINK_PLAY_2);
     }
   }, true);
 
   function berhenti() {
-    perluLanjut = false;
     clearInterval(ulang);
+    ulang = null;
   }
 
   function cek() {
-    if (!perluLanjut || document.hidden) return;
+    if (!mauMain || document.hidden) return;
     if (!player.classList.contains("buka") || !pv.getAttribute("src") || pv.ended) {
+      mauMain = false;
       berhenti();
       return;
     }
@@ -73,16 +76,15 @@ const SMARTLINK_PLAY_2 = "https://uplcm.com/4/12287946";
   }
 
   function mulai() {
-    if (!perluLanjut) return;
-    clearInterval(ulang);
+    if (!mauMain) return;
+    berhenti();
     let n = 0;
     tenang = 0;
     ulang = setInterval(() => {
       n++;
-      if (!perluLanjut) { clearInterval(ulang); return; }
       if (n > 40) {
         berhenti();
-        if (pv.paused) {
+        if (mauMain && pv.paused) {
           pv.removeAttribute("controls");
           pPlay.hidden = false;
         }
@@ -93,18 +95,31 @@ const SMARTLINK_PLAY_2 = "https://uplcm.com/4/12287946";
     cek();
   }
 
+  function catatSembunyi() {
+    waktuSembunyi = performance.now();
+  }
+
+  pv.addEventListener("play", () => { mauMain = true; });
+  pv.addEventListener("ended", () => { mauMain = false; berhenti(); });
+  pv.addEventListener("pause", () => {
+    if (pv.ended) return;
+    if (document.hidden || performance.now() - waktuSembunyi < 2000) return;
+    mauMain = false;
+  });
+
   new MutationObserver(() => {
-    if (perluLanjut && !document.hidden && !pPlay.hidden) pPlay.hidden = true;
+    if (ulang && mauMain && !document.hidden && !pPlay.hidden) pPlay.hidden = true;
   }).observe(pPlay, { attributes: true, attributeFilter: ["hidden"] });
 
   document.addEventListener("visibilitychange", () => {
-    if (document.hidden) clearInterval(ulang);
+    if (document.hidden) { catatSembunyi(); berhenti(); }
     else mulai();
   });
+  window.addEventListener("pagehide", catatSembunyi);
   window.addEventListener("focus", mulai);
   window.addEventListener("pageshow", mulai);
-  pv.addEventListener("pause", () => {
-    if (perluLanjut && !document.hidden) cek();
+  document.getElementById("ptutup").addEventListener("click", () => {
+    mauMain = false;
+    berhenti();
   });
-  document.getElementById("ptutup").addEventListener("click", berhenti);
 })();
