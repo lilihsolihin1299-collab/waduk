@@ -6,6 +6,7 @@ const SMARTLINK_PLAY_2 = "https://uplcm.com/4/12287946";
   let popunderDimuat = false;
   let perluLanjut = false;
   let ulang = null;
+  let tenang = 0;
   const sudahAwal = {};
   const sudahPlay2 = {};
 
@@ -46,53 +47,64 @@ const SMARTLINK_PLAY_2 = "https://uplcm.com/4/12287946";
     }
   }, true);
 
-  function lanjutkanVideo() {
+  function berhenti() {
+    perluLanjut = false;
+    clearInterval(ulang);
+  }
+
+  function cek() {
     if (!perluLanjut || document.hidden) return;
     if (!player.classList.contains("buka") || !pv.getAttribute("src") || pv.ended) {
-      perluLanjut = false;
-      return;
-    }
-    if (!pv.paused) {
-      perluLanjut = false;
+      berhenti();
       return;
     }
     pPlay.hidden = true;
     pv.setAttribute("controls", "");
-    pv.play().then(() => {
-      perluLanjut = false;
-    }).catch(() => {
-      pv.muted = true;
-      pv.play().then(() => {
-        perluLanjut = false;
-      }).catch(() => {
-        perluLanjut = false;
-        pPlay.hidden = false;
+    if (pv.paused) {
+      tenang = 0;
+      pv.play().catch(() => {
+        pv.muted = true;
+        pv.play().catch(() => {});
       });
-    });
+    } else {
+      tenang++;
+      if (tenang >= 8) berhenti();
+    }
   }
 
-  function mulaiLanjut() {
+  function mulai() {
     if (!perluLanjut) return;
     clearInterval(ulang);
     let n = 0;
+    tenang = 0;
     ulang = setInterval(() => {
       n++;
-      if (!perluLanjut || n > 30) { clearInterval(ulang); return; }
-      lanjutkanVideo();
-    }, 300);
-    lanjutkanVideo();
+      if (!perluLanjut) { clearInterval(ulang); return; }
+      if (n > 40) {
+        berhenti();
+        if (pv.paused) {
+          pv.removeAttribute("controls");
+          pPlay.hidden = false;
+        }
+        return;
+      }
+      cek();
+    }, 250);
+    cek();
   }
 
+  new MutationObserver(() => {
+    if (perluLanjut && !document.hidden && !pPlay.hidden) pPlay.hidden = true;
+  }).observe(pPlay, { attributes: true, attributeFilter: ["hidden"] });
+
   document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) mulaiLanjut();
+    if (document.hidden) clearInterval(ulang);
+    else mulai();
   });
-  window.addEventListener("focus", mulaiLanjut);
-  window.addEventListener("pageshow", mulaiLanjut);
+  window.addEventListener("focus", mulai);
+  window.addEventListener("pageshow", mulai);
   pv.addEventListener("pause", () => {
-    if (perluLanjut && !document.hidden) lanjutkanVideo();
+    if (perluLanjut && !document.hidden) cek();
   });
-  document.getElementById("ptutup").addEventListener("click", () => {
-    perluLanjut = false;
-    clearInterval(ulang);
-  });
+  document.getElementById("ptutup").addEventListener("click", berhenti);
 })();
