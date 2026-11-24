@@ -1,4 +1,3 @@
-
 const SMARTLINK_HALAMAN_AWAL = "https://uplcm.com/4/12287946";
 const POPUNDER_PLAY_1 = "12287947";
 const SMARTLINK_PLAY_2 = "https://uplcm.com/4/12287946";
@@ -6,6 +5,7 @@ const SMARTLINK_PLAY_2 = "https://uplcm.com/4/12287946";
 (function () {
   let popunderDimuat = false;
   let perluLanjut = false;
+  let ulang = null;
   const sudahAwal = {};
   const sudahPlay2 = {};
 
@@ -65,17 +65,34 @@ const SMARTLINK_PLAY_2 = "https://uplcm.com/4/12287946";
       pv.play().then(() => {
         perluLanjut = false;
       }).catch(() => {
+        perluLanjut = false;
         pPlay.hidden = false;
       });
     });
   }
 
+  function mulaiLanjut() {
+    if (!perluLanjut) return;
+    clearInterval(ulang);
+    let n = 0;
+    ulang = setInterval(() => {
+      n++;
+      if (!perluLanjut || n > 30) { clearInterval(ulang); return; }
+      lanjutkanVideo();
+    }, 300);
+    lanjutkanVideo();
+  }
+
   document.addEventListener("visibilitychange", () => {
-    if (!document.hidden) lanjutkanVideo();
+    if (!document.hidden) mulaiLanjut();
   });
-  window.addEventListener("focus", lanjutkanVideo);
+  window.addEventListener("focus", mulaiLanjut);
+  window.addEventListener("pageshow", mulaiLanjut);
+  pv.addEventListener("pause", () => {
+    if (perluLanjut && !document.hidden) lanjutkanVideo();
+  });
   document.getElementById("ptutup").addEventListener("click", () => {
     perluLanjut = false;
-  
+    clearInterval(ulang);
   });
 })();
