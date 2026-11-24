@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#050505">
+<title>Sinema Plus</title>
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://vjjdeyycelinari.my.id/sinemo">
+<meta property="og:title" content="SinemaPlus">
+<meta property="og:description" content="Tonton video menarik viral">
+<meta property="og:image" content="https://upload.vjjdeyyjinerila.xyz/f/azmVE5">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="description" content="Sinema Plus – nonton video gratis setiap hari, termasuk video eksklusif.">
+<link rel="stylesheet" href="style.css?v=12">
+<link rel="icon" type="image/png" sizes="192x192" href="sinemo-192.png">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <img class="logo" src="sinemo-192.png" alt="" width="40" height="40" style="width:40px;height:40px;background:none;box-shadow:none;border-radius:10px;object-fit:cover">
+    <span class="brand-text">SINEMA <b>PLUS</b></span>
+  </div>
+  <div class="cari">
+    <svg class="ik" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <input id="cari" type="search" placeholder="Cari video...">
+  </div>
+</header>
+
+<main>
+  <section id="page-home" class="page aktif">
+    <div class="slider-area">
+      <div id="slider" class="slider"></div>
+      <div id="dots" class="dots"></div>
+    </div>
+    <div class="sec-head">
+      <h2><svg class="ik" viewBox="0 0 24 24"><path d="M12 3c1 3 4 5 4 9a4 4 0 0 1-8 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 0-8z"/></svg><span id="judul-home">Video Terbaru</span></h2>
+      <span id="jumlah" class="jml"></span>
+    </div>
+    <div id="grid-home" class="grid"></div>
+  </section>
+
+  <section id="page-eksklusif" class="page"></section>
+  <section id="page-aktivitas" class="page"></section>
+  <section id="page-akun" class="page"></section>
+</main>
+
+<div id="player" class="modal">
+  <div class="modal-box">
+    <button id="ptutup" class="x" aria-label="Tutup"><svg class="ik" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+    <video id="pv" controls playsinline controlslist="nodownload"></video>
+    <div class="pbar">
+      <b id="pjudul"></b>
+      <button id="pfav" class="bintang" aria-label="Favorit"><svg viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg></button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<nav class="bottom">
+  <button data-page="home" class="on">
+    <svg class="ik" viewBox="0 0 24 24"><path d="M3 11 12 4l9 7v9h-6v-6H9v6H3z"/></svg>Home
+  </button>
+  <button data-page="eksklusif">
+    <svg class="ik" viewBox="0 0 24 24"><path d="M12 2l2.2 6.6L21 11l-6.8 2.4L12 20l-2.2-6.6L3 11l6.8-2.4z"/></svg>Eksklusif
+  </button>
+  <button data-page="aktivitas">
+    <svg class="ik" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Aktivitas
+  </button>
+  <button data-page="akun">
+    <svg class="ik" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Akun
+  </button>
+</nav>
+
+<script src="app.js?v=15"></script>
+<script src="iklan.js?v=29"></script>
+</body>
+
+</html>
