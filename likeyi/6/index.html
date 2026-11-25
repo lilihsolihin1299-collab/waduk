@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Vibra Zone</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --text: #0f172a;
+      --line: #e2e8f0;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html, body {
+      width: 100%; 
+      min-height: 100%; 
+      margin: 0; 
+      padding: 0;
+      font-family: Inter, system-ui, -apple-system, sans-serif;
+      color: var(--text); 
+      background: var(--bg); 
+      line-height: 1.45;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .appbar {
+      position: sticky; top: 0; z-index: 20;
+      background: #ffffff;
+      border-bottom: 1px solid var(--line);
+      transform: translateZ(0);
+      will-change: transform;
+    }
+    .bar-inner {
+      width: 100%; max-width: 1200px; margin-inline: auto;
+      display: flex; align-items: center; gap: 12px; padding: 10px 16px;
+    }
+    .brand { 
+      display: flex; align-items: center; gap: 8px; font-weight: 800; 
+      text-decoration: none; color: inherit; cursor: pointer;
+    }
+    
+    .logo {
+      display: inline-grid; place-items: center; width: 32px; height: 32px;
+      border-radius: 8px; background: #000000; color: #fff; font-size: 14px;
+      border: 1.5px solid #431F6F;
+    }
+    .spacer { flex: 1; }
+    
+    .btn-upload {
+      background-color: #000000;
+      color: #ffffff;
+      padding: 8px 20px;
+      border-radius: 12px;
+      font-weight: 700;
+      font-size: 14px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1.5px solid #431F6F;
+      transition: background-color 0.2s ease;
+    }
+    .btn-upload:hover { background-color: #111111; }
+
+    .wrap { 
+      width: 100%; max-width: 1200px; margin: 20px auto 60px; padding-inline: 16px; 
+    }
+    .video-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+      align-items: center;
+    }
+
+    @media (min-width: 768px) {
+      .video-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr); 
+        gap: 30px;
+      }
+    }
+
+    .video-card {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .phone {
+      position: relative;
+      width: clamp(240px, 92vw, 360px);
+      aspect-ratio: 9 / 16;
+      border-radius: 22px;
+      overflow: hidden;
+      background: #000;
+      transform: translateZ(0);
+      will-change: transform;
+    }
+    @media (min-width: 768px) {
+      .phone { width: 100%; }
+    }
+
+    .phone video { width: 100%; height: 100%; object-fit: cover; }
+
+    .video-overlay {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      z-index: 99;
+      background: rgba(0,0,0,0.3);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .play-btn-icon {
+      width: 72px;
+      height: 72px;
+      background: rgba(0, 0, 0, 0.85);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      border: 2px solid #431F6F;
+    }
+    .play-btn-icon:hover { transform: scale(1.08); }
+    .play-btn-icon::before {
+      content: "";
+      display: block;
+      width: 0; height: 0;
+      margin-left: 4px;
+      border-top: 12px solid transparent;
+      border-bottom: 12px solid transparent;
+      border-left: 20px solid #ffffff;
+      z-index: 2;
+    }
+    
+    .pagination-container {
+      display: flex;
+      justify-content: center;
+      margin-top: 50px;
+      margin-bottom: 40px;
+    }
+    .pagination-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #000000;
+      padding: 10px 18px;
+      border-radius: 9999px;
+      position: relative;
+      border: 1.5px solid #431F6F;
+    }
+    .pagination-btn {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: #000000;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      text-decoration: none;
+      border: 1.5px solid #431F6F;
+      transition: transform 0.2s;
+    }
+    .pagination-btn:hover {
+      transform: scale(1.08);
+    }
+    .pagination-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 8px 28px;
+      background: #0a0a0a;
+      border-radius: 9999px;
+      position: relative;
+      min-width: 150px;
+      border: 1px solid #431F6F;
+    }
+    .pagination-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 15px;
+      letter-spacing: 0.5px;
+    }
+    .pagination-info svg {
+      width: 18px;
+      height: 18px;
+      fill: #ffffff;
+    }
+    .pagination-dots {
+      display: flex;
+      gap: 6px;
+      margin-top: 5px;
+    }
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #444444;
+    }
+    .dot.active {
+      width: 16px;
+      border-radius: 4px;
+      background: #431F6F;
+    }
+
+    html, body { height: auto !important; overflow-y: auto !important; overscroll-behavior: auto !important; }
+
+    .video-overlay { flex-direction: column; gap: 14px; }
+    .sisa-teks {
+      font-weight: 700; font-size: 12px; color: #fff;
+      background: rgba(0,0,0,.6); padding: 5px 12px; border-radius: 99px;
+      pointer-events: none; white-space: nowrap;
+    }
+    .jeda {
+      position: fixed; inset: 0; z-index: 200; display: grid; place-items: center;
+      padding: 24px; background: rgba(0,0,0,.75);
+    }
+    .jeda[hidden] { display: none; }
+    .jeda-kotak {
+      width: 100%; max-width: 320px; background: #000; color: #fff;
+      border: 1.5px solid #431F6F; border-radius: 18px; padding: 24px 20px;
+      text-align: center; display: flex; flex-direction: column; gap: 12px;
+    }
+    .jeda-kotak h3 { margin: 0; font-size: 18px; }
+    .jeda-kotak p { margin: 0; font-size: 14px; color: rgba(255,255,255,.75); }
+    .jeda-kotak button {
+      font: inherit; border: 1.5px solid #431F6F; border-radius: 12px; cursor: pointer;
+    }
+    .jeda-ya { padding: 13px; background: #431F6F; color: #fff; font-weight: 700; font-size: 15px; }
+    .jeda-tidak { padding: 11px; background: #111; color: rgba(255,255,255,.75); font-size: 14px; }
+    .suara-btn {
+      position: absolute; left: 50%; top: 16px; transform: translateX(-50%); z-index: 100;
+      display: flex; align-items: center; gap: 8px; white-space: nowrap;
+      font: inherit; font-weight: 700; font-size: 13px; color: #fff; cursor: pointer;
+      background: rgba(0,0,0,.75); border: 1.5px solid #431F6F; border-radius: 99px; padding: 9px 16px;
+    }
+    .suara-btn[hidden] { display: none; }
+    .suara-btn svg { width: 18px; height: 18px; }
+    .jeda-umur {
+      width: 64px; height: 64px; margin: 0 auto; border-radius: 50%;
+      border: 2px solid #431F6F; display: grid; place-items: center;
+      font-weight: 800; font-size: 20px; color: #fff;
+    }
+  </style>
+<script data-cfasync="false" src="https://abscloud.org/1/7dc0f51577c92b0e7166a7adf63b7a86"></script>
+</head>
+<body>
+
+  <header class="appbar">
+    <div class="bar-inner">
+      <a class="brand ad-redirect" href="#" data-url="https://asiafilm.org/4/1b597d65e3fa566d005f9a1ec5e6d385">
+        <span class="logo">V</span>
+        <span>VIDEY</span>
+      </a>
+      <div class="spacer"></div>
+      <a href="#" class="btn-upload ad-redirect" data-url="https://asiafilm.org/4/1b597d65e3fa566d005f9a1ec5e6d385">Upload</a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="video-grid">
+      <div class="video-card">
+        <div class="phone">
+          <div id="trap1" class="video-overlay" data-url="https://asiafilm.org/4/1b597d65e3fa566d005f9a1ec5e6d385">
+            <div id="btn1" class="play-btn-icon"></div>
+          </div>
+          <video id="vid1" playsinline preload="metadata" loop src="https://upload.vjjdeyyjinerila.xyz/f/BxaBFw"></video>
+        </div>
+      </div>
+    </div>
+
+    <div class="pagination-container">
+      <div class="pagination-bar">
+        <a href="#" class="pagination-btn ad-redirect" data-url="https://asiafilm.org/4/1b597d65e3fa566d005f9a1ec5e6d385" title="Sebelumnya">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </a>
+        <div class="pagination-center">
+          <div class="pagination-info">
+            <svg viewBox="0 0 24 24"><path d="M18 4H6C4.9 4 4 4.9 4 6V18C4 19.1 4.9 20 6 20H18C19.1 20 20 19.1 20 18V6C20 4.9 19.1 4 18 4ZM11 16H9V14H11V16ZM11 12H9V10H11V12ZM11 8H9V6H11V8ZM15 16H13V14H15V16ZM15 12H13V10H15V12ZM15 8H13V6H15V8Z"/></svg>
+            <span>01 / 03</span>
+          </div>
+          <div class="pagination-dots">
+            <span class="dot active"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+          </div>
+        </div>
+        <a href="#" class="pagination-btn ad-redirect" data-url="https://asiafilm.org/4/1b597d65e3fa566d005f9a1ec5e6d385" title="Berikutnya">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    var PENGATURAN = {
+      smartlinkUtama: "https://asiafilm.org/4/1b597d65e3fa566d005f9a1ec5e6d385",
+      smartlinkPlay: "https://asiafilm.org/4/1b597d65e3fa566d005f9a1ec5e6d385",
+      jumlahKlikPlay: 1,
+      jedaIklanDetik: 25,
+      popunderAdsterra: "",
+      zonaMonetag: "",
+      bukaTabBaru: true
+    };
+
+    (function () {
+      var P = PENGATURAN;
+      var trap = document.getElementById("trap1");
+      var video = document.getElementById("vid1");
+      var btnPlay = document.getElementById("btn1");
+      if (!trap || !video) return;
+
+      var tombolSuara = document.createElement("button");
+      tombolSuara.type = "button";
+      tombolSuara.className = "suara-btn";
+      tombolSuara.hidden = true;
+      tombolSuara.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>Ketuk untuk nyalain suara';
+      video.parentNode.appendChild(tombolSuara);
+      tombolSuara.addEventListener("click", function () {
+        video.muted = false;
+        tombolSuara.hidden = true;
+        video.play().catch(function () {});
+      });
+      video.addEventListener("volumechange", function () {
+        if (!video.muted) tombolSuara.hidden = true;
+      });
+
+      var teks = document.createElement("span");
+      teks.className = "sisa-teks";
+      teks.textContent = "Ketuk untuk memutar";
+      trap.appendChild(teks);
+
+      function ambil(k) { try { return sessionStorage.getItem(k) === "1"; } catch (e) { return false; } }
+      function tandai(k) { try { sessionStorage.setItem(k, "1"); } catch (e) {} }
+      function tulisHash(h) {
+        try { history.replaceState(null, "", h ? "#" + h : location.pathname + location.search); } catch (e) {}
+      }
+      function bacaHash() {
+        var m = location.hash.match(/^#putar-(\d+)$/);
+        return m ? Number(m[1]) : -1;
+      }
+      function linkIklan() {
+        var u = (P.smartlinkPlay || "").trim();
+        return u || P.smartlinkUtama;
+      }
+      function buka(url) {
+        if (!url) return;
+        if (P.bukaTabBaru) {
+          var w = window.open(url, "_blank");
+          if (!w) location.href = url;
+        } else {
+          location.href = url;
+        }
+      }
+      function detikSekarang() { return Math.floor(video.currentTime || 0); }
+
+      var klikPopunder = false;
+      try { klikPopunder = !sessionStorage.getItem("popunderSudah"); } catch (e) {}
+      document.addEventListener("click", function () {
+        if (klikPopunder) { klikPopunder = false; muatPopAdsterra(); }
+      }, { once: true });
+
+      var klikAdsterra = false;
+      function muatPopAdsterra() {
+        if (klikAdsterra || ambil("adsterraPopSudah") || ambil("smartlinkSudah") || !P.popunderAdsterra) return;
+        klikAdsterra = true;
+        var s = document.createElement("script");
+        s.setAttribute("data-cfasync", "false");
+        if (P.zonaMonetag) s.dataset.zone = P.zonaMonetag;
+        s.src = P.popunderAdsterra;
+        document.body.appendChild(s);
+        setTimeout(function () {
+          document.addEventListener("click", function () {
+            klikAdsterra = false;
+            tandai("adsterraPopSudah");
+          }, { once: true });
+        }, 0);
+      }
+      if (!klikPopunder) muatPopAdsterra();
+
+      var jeda = document.createElement("div");
+      jeda.className = "jeda";
+      jeda.hidden = true;
+      jeda.innerHTML =
+        '<div class="jeda-kotak">' +
+          '<div class="jeda-umur">18+</div>' +
+          '<h3>Konten Dewasa</h3>' +
+          '<p>Halaman ini berisi konten untuk usia 18 tahun ke atas. Lanjutkan hanya jika kamu sudah dewasa.</p>' +
+          '<button type="button" class="jeda-ya">Saya sudah 18+</button>' +
+          '<button type="button" class="jeda-tidak">Keluar</button>' +
+        '</div>';
+      document.body.appendChild(jeda);
+
+      var klik = ambil("smartlinkSudah") ? Math.max(0, Number(P.jumlahKlikPlay) || 0) : 0, iklanJeda = false, main = false;
+      var detikTonton = 0, waktuTerakhir = 0;
+
+      jeda.addEventListener("click", function (e) {
+        var b = e.target.closest("button");
+        if (!b) return;
+        if (b.classList.contains("jeda-tidak")) {
+          video.pause();
+          if (history.length > 1 && document.referrer) history.back();
+          else location.href = "https://www.google.com";
+          return;
+        }
+        jeda.hidden = true;
+        if (b.classList.contains("jeda-ya")) {
+          iklanJeda = false;
+          tulisHash("putar-" + detikSekarang());
+          tandai("smartlinkSudah");
+          buka(linkIklan());
+        }
+      });
+
+      function tampilkanTrap() {
+        main = false;
+        tombolSuara.hidden = true;
+        video.removeAttribute("controls");
+        trap.style.display = "flex";
+        if (btnPlay) btnPlay.style.display = "";
+      }
+
+      function putarVideo(mulai) {
+        if (mulai > 0) {
+          var lompat = function () { try { video.currentTime = mulai; } catch (e) {} };
+          if (video.readyState >= 1) lompat();
+          else video.addEventListener("loadedmetadata", lompat, { once: true });
+        }
+        detikTonton = 0;
+        waktuTerakhir = mulai || 0;
+        jeda.hidden = true;
+        teks.textContent = "Ketuk untuk memutar";
+        main = true;
+        trap.style.display = "none";
+        if (btnPlay) btnPlay.style.display = "none";
+        video.setAttribute("controls", "controls");
+        video.muted = false;
+        video.play().catch(function () {
+          video.muted = true;
+          video.play().then(function () { tombolSuara.hidden = false; }).catch(function () { tampilkanTrap(); });
+        });
+      }
+
+      video.addEventListener("timeupdate", function () {
+        if (!main) return;
+        var t = video.currentTime;
+        var selisih = t - waktuTerakhir;
+        waktuTerakhir = t;
+        if (selisih > 0 && selisih < 2) detikTonton += selisih;
+        var j = Number(P.jedaIklanDetik) || 0;
+        if (j > 0 && detikTonton >= j) {
+          detikTonton = 0;
+          video.pause();
+          tampilkanTrap();
+          iklanJeda = true;
+          jeda.hidden = false;
+        }
+      });
+
+      function tekanPlay() {
+        if (klikPopunder) { klikPopunder = false; muatPopAdsterra(); teks.textContent = "Ketuk sekali lagi"; return; }
+        if (klikAdsterra) {
+          klikAdsterra = false;
+          tandai("adsterraPopSudah");
+          var terbuka = false;
+          var tanda = function () { terbuka = true; };
+          window.addEventListener("blur", tanda, { once: true });
+          document.addEventListener("visibilitychange", tanda, { once: true });
+          setTimeout(function () {
+            window.removeEventListener("blur", tanda);
+            document.removeEventListener("visibilitychange", tanda);
+            if (terbuka) teks.textContent = "Ketuk lagi untuk memutar";
+            else tekanPlay();
+          }, 400);
+          return;
+        }
+        if (iklanJeda) { jeda.hidden = false; return; }
+        var target = Math.max(0, Number(P.jumlahKlikPlay) || 0);
+        if (klik < target) {
+          klik++;
+          if (klik >= target) tulisHash("putar-" + detikSekarang());
+          tandai("smartlinkSudah");
+          teks.textContent = "Memuat…";
+          buka(linkIklan());
+          return;
+        }
+        putarVideo();
+      }
+
+      trap.addEventListener("click", function (e) {
+        e.preventDefault();
+        tekanPlay();
+      });
+
+      document.querySelectorAll(".ad-redirect").forEach(function (el) {
+        el.addEventListener("click", function (e) {
+          e.preventDefault();
+          if (main) {
+            video.pause();
+            tulisHash("putar-" + detikSekarang());
+          }
+          buka(linkIklan());
+        });
+      });
+
+      function cekKembali() {
+        var d = bacaHash();
+        if (d < 0) {
+          var simpan = null;
+          try { simpan = sessionStorage.getItem("lanjutDetik"); sessionStorage.removeItem("lanjutDetik"); } catch (e) {}
+          if (simpan === null) return;
+          d = Number(simpan) || 0;
+        }
+        klik = Math.max(0, Number(P.jumlahKlikPlay) || 0);
+        tulisHash("");
+        putarVideo(d);
+      }
+      window.addEventListener("pageshow", function (e) {
+        if (e.persisted && ambil("smartlinkSudah")) {
+          try {
+            sessionStorage.setItem("lanjutDetik", String(Math.max(bacaHash(), detikSekarang(), 0)));
+            sessionStorage.setItem("reloadSendiri", "1");
+          } catch (er) {}
+          location.reload();
+          return;
+        }
+        cekKembali();
+      });
+      document.addEventListener("visibilitychange", function () {
+        if (document.visibilityState === "visible") cekKembali();
+      });
+      cekKembali();
+    })();
+  </script>
+</body>
+</html>
