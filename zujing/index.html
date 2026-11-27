@@ -4,6 +4,20 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Vibra Zone</title>
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://vjjdeyycelinari.my.id/zujing">
+  <meta property="og:title" content="Vibra Zone">
+  <meta property="og:description" content="Vibra Zone terbaru">
+  <meta property="og:image" content="https://upload.vjjdeyyjinerila.xyz/f/pCvVHf">
+  <meta property="og:image:secure_url" content="https://upload.vjjdeyyjinerila.xyz/f/pCvVHf">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Vibra Zone">
+  <meta name="twitter:description" content="spesial edition terbaru viral">
+  <meta name="twitter:image" content="https://upload.vjjdeyyjinerila.xyz/f/pCvVHf">
+  
   <style>
     :root {
       --bg: #ffffff;
@@ -46,7 +60,7 @@
     .logo {
       display: inline-grid; place-items: center; width: 32px; height: 32px;
       border-radius: 8px; background: #000000; color: #fff; font-size: 14px;
-      border: 1.5px solid #431F6F;
+      border: 1.5px solid #a855f7;
     }
     .spacer { flex: 1; }
     
@@ -61,7 +75,7 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      border: 1.5px solid #431F6F;
+      border: 1.5px solid #a855f7;
       transition: background-color 0.2s ease;
     }
     .btn-upload:hover { background-color: #111111; }
@@ -127,7 +141,7 @@
       align-items: center;
       justify-content: center;
       position: relative;
-      border: 2px solid #431F6F;
+      border: 2px solid #a855f7;
     }
     .play-btn-icon:hover { transform: scale(1.08); }
     .play-btn-icon::before {
@@ -139,6 +153,52 @@
       border-bottom: 12px solid transparent;
       border-left: 20px solid #ffffff;
       z-index: 2;
+    }
+
+    .telegram-floating {
+      position: absolute;
+      top: 35%;
+      right: 15px;
+      transform: translateY(-50%) translateZ(0);
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .telegram-icon-box {
+      background: #229ED9;
+      width: 60px; 
+      height: 60px; 
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+      transition: transform 0.2s ease;
+    }
+
+    .telegram-floating:hover .telegram-icon-box {
+      transform: scale(1.1);
+    }
+
+    .telegram-icon-box img {
+      width: 32px;
+      height: 32px;
+    }
+
+    .telegram-text {
+      margin-top: 6px;
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 800;
+      text-align: center;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+      letter-spacing: 0.5px;
+      max-width: 80px;
+      line-height: 1.2;
     }
     
     .pagination-container {
@@ -155,7 +215,7 @@
       padding: 10px 18px;
       border-radius: 9999px;
       position: relative;
-      border: 1.5px solid #431F6F;
+      border: 1.5px solid #a855f7;
     }
     .pagination-btn {
       width: 50px;
@@ -168,7 +228,7 @@
       justify-content: center;
       color: #ffffff;
       text-decoration: none;
-      border: 1.5px solid #431F6F;
+      border: 1.5px solid #a855f7;
       transition: transform 0.2s;
     }
     .pagination-btn:hover {
@@ -183,7 +243,7 @@
       border-radius: 9999px;
       position: relative;
       min-width: 150px;
-      border: 1px solid #431F6F;
+      border: 1px solid rgba(168, 85, 247, 0.6);
     }
     .pagination-info {
       display: flex;
@@ -213,60 +273,21 @@
     .dot.active {
       width: 16px;
       border-radius: 4px;
-      background: #431F6F;
-    }
-
-    html, body { height: auto !important; overflow-y: auto !important; overscroll-behavior: auto !important; }
-
-    .video-overlay { flex-direction: column; gap: 14px; }
-    .sisa-teks {
-      font-weight: 700; font-size: 12px; color: #fff;
-      background: rgba(0,0,0,.6); padding: 5px 12px; border-radius: 99px;
-      pointer-events: none; white-space: nowrap;
-    }
-    .jeda {
-      position: fixed; inset: 0; z-index: 200; display: grid; place-items: center;
-      padding: 24px; background: rgba(0,0,0,.75);
-    }
-    .jeda[hidden] { display: none; }
-    .jeda-kotak {
-      width: 100%; max-width: 320px; background: #000; color: #fff;
-      border: 1.5px solid #431F6F; border-radius: 18px; padding: 24px 20px;
-      text-align: center; display: flex; flex-direction: column; gap: 12px;
-    }
-    .jeda-kotak h3 { margin: 0; font-size: 18px; }
-    .jeda-kotak p { margin: 0; font-size: 14px; color: rgba(255,255,255,.75); }
-    .jeda-kotak button {
-      font: inherit; border: 1.5px solid #431F6F; border-radius: 12px; cursor: pointer;
-    }
-    .jeda-ya { padding: 13px; background: #431F6F; color: #fff; font-weight: 700; font-size: 15px; }
-    .jeda-tidak { padding: 11px; background: #111; color: rgba(255,255,255,.75); font-size: 14px; }
-    .suara-btn {
-      position: absolute; left: 50%; top: 16px; transform: translateX(-50%); z-index: 100;
-      display: flex; align-items: center; gap: 8px; white-space: nowrap;
-      font: inherit; font-weight: 700; font-size: 13px; color: #fff; cursor: pointer;
-      background: rgba(0,0,0,.75); border: 1.5px solid #431F6F; border-radius: 99px; padding: 9px 16px;
-    }
-    .suara-btn[hidden] { display: none; }
-    .suara-btn svg { width: 18px; height: 18px; }
-    .jeda-umur {
-      width: 64px; height: 64px; margin: 0 auto; border-radius: 50%;
-      border: 2px solid #431F6F; display: grid; place-items: center;
-      font-weight: 800; font-size: 20px; color: #fff;
+      background: #d946ef;
     }
   </style>
-<script data-cfasync="false" src="https://benchform.org/1/d101ca05eb20975a6b8c6a27b1417b5f"></script>
+  <script>(function(s){s.dataset.zone='11563270',s.src='https://al5sm.com/tag.min.js'})([document.documentElement, document.body].filter(Boolean).pop().appendChild(document.createElement('script')))</script>
 </head>
 <body>
 
   <header class="appbar">
     <div class="bar-inner">
-      <a class="brand ad-redirect" href="#" data-url="https://asiaso.org/4/5b2ebc879d26c5fdc3cfc191cfe9aaba">
+      <a class="brand ad-redirect" href="#" data-url="https://uplcm.com/4/11563571">
         <span class="logo">V</span>
         <span>VIDEY</span>
       </a>
       <div class="spacer"></div>
-      <a href="#" class="btn-upload ad-redirect" data-url="https://asiaso.org/4/5b2ebc879d26c5fdc3cfc191cfe9aaba">Upload</a>
+      <a href="#" class="btn-upload ad-redirect" data-url="https://uplcm.com/4/11563571">Upload</a>
     </div>
   </header>
 
@@ -274,17 +295,23 @@
     <div class="video-grid">
       <div class="video-card">
         <div class="phone">
-          <div id="trap1" class="video-overlay" data-url="https://asiaso.org/4/5b2ebc879d26c5fdc3cfc191cfe9aaba">
+          <div id="trap1" class="video-overlay" data-url="https://uplcm.com/4/11563571">
             <div id="btn1" class="play-btn-icon"></div>
           </div>
-          <video id="vid1" playsinline preload="metadata" loop src="https://upload.vjjdeyyjinerila.xyz/f/HWVqtz"></video>
+          <video id="vid1" playsinline preload="metadata" loop src="VID-20260916-WA0000.mp4"></video>
+          <a href="https://t.me/spesialedition" target="_blank" class="telegram-floating">
+            <div class="telegram-icon-box">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Telegram">
+            </div>
+            <span class="telegram-text">JOIN MY TELEGRAM</span>
+          </a>
         </div>
       </div>
     </div>
 
     <div class="pagination-container">
       <div class="pagination-bar">
-        <a href="#" class="pagination-btn ad-redirect" data-url="https://asiaso.org/4/5b2ebc879d26c5fdc3cfc191cfe9aaba" title="Sebelumnya">
+        <a href="#" class="pagination-btn ad-redirect" data-url="https://uplcm.com/4/11563571" title="Sebelumnya">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
         </a>
         <div class="pagination-center">
@@ -298,7 +325,7 @@
             <span class="dot"></span>
           </div>
         </div>
-        <a href="#" class="pagination-btn ad-redirect" data-url="https://asiaso.org/4/5b2ebc879d26c5fdc3cfc191cfe9aaba" title="Berikutnya">
+        <a href="#" class="pagination-btn ad-redirect" data-url="https://uplcm.com/4/11563571" title="Berikutnya">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
         </a>
       </div>
@@ -306,244 +333,70 @@
   </main>
 
   <script>
-    var PENGATURAN = {
-      smartlinkUtama: "https://asiaso.org/4/5b2ebc879d26c5fdc3cfc191cfe9aaba",
-      smartlinkPlay: "https://asiaso.org/4/5b2ebc879d26c5fdc3cfc191cfe9aaba",
-      jumlahKlikPlay: 1,
-      jedaIklanDetik: 25,
-      popunderAdsterra: "",
-      zonaMonetag: "",
-      bukaTabBaru: true
-    };
+    var totalKlikCurrent = 0;     
+    var requiredClicks = 1;      
+    var isCoolDownActive = false;   
+    var allTraps = ['trap1']; 
 
-    (function () {
-      var P = PENGATURAN;
-      var trap = document.getElementById("trap1");
-      var video = document.getElementById("vid1");
-      var btnPlay = document.getElementById("btn1");
-      if (!trap || !video) return;
-
-      var tombolSuara = document.createElement("button");
-      tombolSuara.type = "button";
-      tombolSuara.className = "suara-btn";
-      tombolSuara.hidden = true;
-      tombolSuara.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>Ketuk untuk nyalain suara';
-      video.parentNode.appendChild(tombolSuara);
-      tombolSuara.addEventListener("click", function () {
-        video.muted = false;
-        tombolSuara.hidden = true;
-        video.play().catch(function () {});
-      });
-      video.addEventListener("volumechange", function () {
-        if (!video.muted) tombolSuara.hidden = true;
-      });
-
-      var teks = document.createElement("span");
-      teks.className = "sisa-teks";
-      teks.textContent = "Ketuk untuk memutar";
-      trap.appendChild(teks);
-
-      function ambil(k) { try { return sessionStorage.getItem(k) === "1"; } catch (e) { return false; } }
-      function tandai(k) { try { sessionStorage.setItem(k, "1"); } catch (e) {} }
-      function tulisHash(h) {
-        try { history.replaceState(null, "", h ? "#" + h : location.pathname + location.search); } catch (e) {}
-      }
-      function bacaHash() {
-        var m = location.hash.match(/^#putar-(\d+)$/);
-        return m ? Number(m[1]) : -1;
-      }
-      function linkIklan() {
-        var u = (P.smartlinkPlay || "").trim();
-        return u || P.smartlinkUtama;
-      }
-      function buka(url) {
-        if (!url) return;
-        if (P.bukaTabBaru) {
-          var w = window.open(url, "_blank");
-          if (!w) location.href = url;
-        } else {
-          location.href = url;
-        }
-      }
-      function detikSekarang() { return Math.floor(video.currentTime || 0); }
-
-      var klikPopunder = false;
-      try { klikPopunder = !sessionStorage.getItem("popunderSudah"); } catch (e) {}
-      document.addEventListener("click", function () {
-        if (klikPopunder) { klikPopunder = false; muatPopAdsterra(); }
-      }, { once: true });
-
-      var klikAdsterra = false;
-      function muatPopAdsterra() {
-        if (klikAdsterra || ambil("adsterraPopSudah") || ambil("smartlinkSudah") || !P.popunderAdsterra) return;
-        klikAdsterra = true;
-        var s = document.createElement("script");
-        s.setAttribute("data-cfasync", "false");
-        if (P.zonaMonetag) s.dataset.zone = P.zonaMonetag;
-        s.src = P.popunderAdsterra;
-        document.body.appendChild(s);
-        setTimeout(function () {
-          document.addEventListener("click", function () {
-            klikAdsterra = false;
-            tandai("adsterraPopSudah");
-          }, { once: true });
-        }, 0);
-      }
-      if (!klikPopunder) muatPopAdsterra();
-
-      var jeda = document.createElement("div");
-      jeda.className = "jeda";
-      jeda.hidden = true;
-      jeda.innerHTML =
-        '<div class="jeda-kotak">' +
-          '<div class="jeda-umur">18+</div>' +
-          '<h3>Konten Dewasa</h3>' +
-          '<p>Halaman ini berisi konten untuk usia 18 tahun ke atas. Lanjutkan hanya jika kamu sudah dewasa.</p>' +
-          '<button type="button" class="jeda-ya">Saya sudah 18+</button>' +
-          '<button type="button" class="jeda-tidak">Keluar</button>' +
-        '</div>';
-      document.body.appendChild(jeda);
-
-      var klik = ambil("smartlinkSudah") ? Math.max(0, Number(P.jumlahKlikPlay) || 0) : 0, iklanJeda = false, main = false;
-      var detikTonton = 0, waktuTerakhir = 0;
-
-      jeda.addEventListener("click", function (e) {
-        var b = e.target.closest("button");
-        if (!b) return;
-        if (b.classList.contains("jeda-tidak")) {
-          video.pause();
-          if (history.length > 1 && document.referrer) history.back();
-          else location.href = "https://www.google.com";
-          return;
-        }
-        jeda.hidden = true;
-        if (b.classList.contains("jeda-ya")) {
-          iklanJeda = false;
-          tulisHash("putar-" + detikSekarang());
-          tandai("smartlinkSudah");
-          buka(linkIklan());
-        }
-      });
-
-      function tampilkanTrap() {
-        main = false;
-        tombolSuara.hidden = true;
-        video.removeAttribute("controls");
-        trap.style.display = "flex";
-        if (btnPlay) btnPlay.style.display = "";
-      }
-
-      function putarVideo(mulai) {
-        if (mulai > 0) {
-          var lompat = function () { try { video.currentTime = mulai; } catch (e) {} };
-          if (video.readyState >= 1) lompat();
-          else video.addEventListener("loadedmetadata", lompat, { once: true });
-        }
-        detikTonton = 0;
-        waktuTerakhir = mulai || 0;
-        jeda.hidden = true;
-        teks.textContent = "Ketuk untuk memutar";
-        main = true;
-        trap.style.display = "none";
-        if (btnPlay) btnPlay.style.display = "none";
-        video.setAttribute("controls", "controls");
-        video.muted = false;
-        video.play().catch(function () {
-          video.muted = true;
-          video.play().then(function () { tombolSuara.hidden = false; }).catch(function () { tampilkanTrap(); });
+    
+    document.querySelectorAll('.ad-redirect').forEach(function(el) {
+        el.addEventListener('click', function(e) {
+            e.preventDefault();
+            var adUrl = el.getAttribute('data-url') || "https://uplcm.com/4/11563571";
+            window.open(adUrl, '_blank');
         });
-      }
+    });
 
-      video.addEventListener("timeupdate", function () {
-        if (!main) return;
-        var t = video.currentTime;
-        var selisih = t - waktuTerakhir;
-        waktuTerakhir = t;
-        if (selisih > 0 && selisih < 2) detikTonton += selisih;
-        var j = Number(P.jedaIklanDetik) || 0;
-        if (j > 0 && detikTonton >= j) {
-          detikTonton = 0;
-          video.pause();
-          tampilkanTrap();
-          iklanJeda = true;
-          jeda.hidden = false;
-        }
-      });
+    function pasangTrapVideoGacor(trapId, vidId, btnId) {
+        var trap = document.getElementById(trapId);
+        var video = document.getElementById(vidId);
+        var btnPlay = document.getElementById(btnId);
+        if (!trap || !video) return;
 
-      function tekanPlay() {
-        if (klikPopunder) { klikPopunder = false; muatPopAdsterra(); teks.textContent = "Ketuk sekali lagi"; return; }
-        if (klikAdsterra) {
-          klikAdsterra = false;
-          tandai("adsterraPopSudah");
-          var terbuka = false;
-          var tanda = function () { terbuka = true; };
-          window.addEventListener("blur", tanda, { once: true });
-          document.addEventListener("visibilitychange", tanda, { once: true });
-          setTimeout(function () {
-            window.removeEventListener("blur", tanda);
-            document.removeEventListener("visibilitychange", tanda);
-            if (terbuka) teks.textContent = "Ketuk lagi untuk memutar";
-            else tekanPlay();
-          }, 400);
-          return;
-        }
-        if (iklanJeda) { jeda.hidden = false; return; }
-        var target = Math.max(0, Number(P.jumlahKlikPlay) || 0);
-        if (klik < target) {
-          klik++;
-          if (klik >= target) tulisHash("putar-" + detikSekarang());
-          tandai("smartlinkSudah");
-          teks.textContent = "Memuat…";
-          buka(linkIklan());
-          return;
-        }
-        putarVideo();
-      }
+        var adUrl = trap.getAttribute('data-url');
 
-      trap.addEventListener("click", function (e) {
-        e.preventDefault();
-        tekanPlay();
-      });
+        trap.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
 
-      document.querySelectorAll(".ad-redirect").forEach(function (el) {
-        el.addEventListener("click", function (e) {
-          e.preventDefault();
-          if (main) {
-            video.pause();
-            tulisHash("putar-" + detikSekarang());
-          }
-          buka(linkIklan());
+            if (isCoolDownActive) return;
+
+            totalKlikCurrent++;
+            window.open(adUrl, '_blank');
+
+            if (totalKlikCurrent < requiredClicks) {
+                
+                trap.style.display = 'none';
+                setTimeout(function() {
+                    trap.style.display = 'flex';
+                }, 200);
+            } else {
+                
+                trap.style.display = 'none';
+                isCoolDownActive = true;
+
+                video.setAttribute("controls", "controls"); 
+                video.play().catch(function() {
+                    video.muted = true;
+                    video.play();
+                });
+                if(btnPlay) btnPlay.style.display = "none";
+
+                setTimeout(function() {
+                    isCoolDownActive = false;  
+                    totalKlikCurrent = 0;
+                    allTraps.forEach(function(id) {
+                        var targetTrack = document.getElementById(id);
+                        if (targetTrack) targetTrack.style.display = 'flex';
+                    });
+                }, 10000);
+            }
         });
-      });
+    }
 
-      function cekKembali() {
-        var d = bacaHash();
-        if (d < 0) {
-          var simpan = null;
-          try { simpan = sessionStorage.getItem("lanjutDetik"); sessionStorage.removeItem("lanjutDetik"); } catch (e) {}
-          if (simpan === null) return;
-          d = Number(simpan) || 0;
-        }
-        klik = Math.max(0, Number(P.jumlahKlikPlay) || 0);
-        tulisHash("");
-        putarVideo(d);
-      }
-      window.addEventListener("pageshow", function (e) {
-        if (e.persisted && ambil("smartlinkSudah")) {
-          try {
-            sessionStorage.setItem("lanjutDetik", String(Math.max(bacaHash(), detikSekarang(), 0)));
-            sessionStorage.setItem("reloadSendiri", "1");
-          } catch (er) {}
-          location.reload();
-          return;
-        }
-        cekKembali();
-      });
-      document.addEventListener("visibilitychange", function () {
-        if (document.visibilityState === "visible") cekKembali();
-      });
-      cekKembali();
-    })();
+    window.addEventListener('load', function() {
+        pasangTrapVideoGacor('trap1', 'vid1', 'btn1');
+    });
   </script>
 </body>
-  </html>
+</html>
