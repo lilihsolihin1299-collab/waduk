@@ -1,6 +1,7 @@
 const SMARTLINK_HALAMAN_AWAL = "https://uplcm.com/4/12287946";
 const POPUNDER_PLAY_1 = "12287947";
 const SMARTLINK_PLAY_2 = "https://uplcm.com/4/12287946";
+const JEDA_OVERLAY_DETIK = 10;
 
 (function () {
   let popunderDimuat = false;
@@ -8,8 +9,11 @@ const SMARTLINK_PLAY_2 = "https://uplcm.com/4/12287946";
   let ulang = null;
   let tenang = 0;
   let waktuSembunyi = -10000;
+  let hitung = false;
+  let overlayJeda = false;
+  let detikTonton = 0;
+  let waktuTerakhir = 0;
   const sudahAwal = {};
-  const sudahPlay2 = {};
 
   function bukaLink(url) {
     if (url && url.trim()) window.open(url.trim(), "_blank", "noopener");
@@ -30,6 +34,9 @@ const SMARTLINK_PLAY_2 = "https://uplcm.com/4/12287946";
 
   window.bukaVideo = function (id) {
     mauMain = false;
+    hitung = false;
+    overlayJeda = false;
+    detikTonton = 0;
     bukaAsli(id);
     if (!sudahAwal[id]) {
       sudahAwal[id] = true;
@@ -42,11 +49,11 @@ const SMARTLINK_PLAY_2 = "https://uplcm.com/4/12287946";
     const tombol = e.target.closest(".p-play");
     if (!tombol || !sedang) return;
     mauMain = true;
-    const id = sedang.id;
-    if (!sudahPlay2[id]) {
-      sudahPlay2[id] = true;
-      bukaLink(SMARTLINK_PLAY_2);
-    }
+    hitung = true;
+    overlayJeda = false;
+    detikTonton = 0;
+    waktuTerakhir = pv.currentTime || 0;
+    bukaLink(SMARTLINK_PLAY_2);
   }, true);
 
   function berhenti() {
@@ -55,7 +62,7 @@ const SMARTLINK_PLAY_2 = "https://uplcm.com/4/12287946";
   }
 
   function cek() {
-    if (!mauMain || document.hidden) return;
+    if (!mauMain || document.hidden || overlayJeda) return;
     if (!player.classList.contains("buka") || !pv.getAttribute("src") || pv.ended) {
       mauMain = false;
       berhenti();
@@ -107,8 +114,22 @@ const SMARTLINK_PLAY_2 = "https://uplcm.com/4/12287946";
     mauMain = false;
   });
 
+  pv.addEventListener("timeupdate", () => {
+    if (!hitung || !mauMain || overlayJeda || document.hidden) return;
+    if (!player.classList.contains("buka")) return;
+    const t = pv.currentTime;
+    const selisih = t - waktuTerakhir;
+    waktuTerakhir = t;
+    if (selisih > 0 && selisih < 2) detikTonton += selisih;
+    if (detikTonton >= JEDA_OVERLAY_DETIK) {
+      detikTonton = 0;
+      overlayJeda = true;
+      pPlay.hidden = false;
+    }
+  });
+
   new MutationObserver(() => {
-    if (ulang && mauMain && !document.hidden && !pPlay.hidden) pPlay.hidden = true;
+    if (ulang && mauMain && !overlayJeda && !document.hidden && !pPlay.hidden) pPlay.hidden = true;
   }).observe(pPlay, { attributes: true, attributeFilter: ["hidden"] });
 
   document.addEventListener("visibilitychange", () => {
@@ -120,6 +141,10 @@ const SMARTLINK_PLAY_2 = "https://uplcm.com/4/12287946";
   window.addEventListener("pageshow", mulai);
   document.getElementById("ptutup").addEventListener("click", () => {
     mauMain = false;
-    berhenti();
+    hitung = false;
+    overlayJeda = false;
+    berhenti(
+      
+    );
   });
 })();
