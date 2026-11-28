@@ -6,6 +6,8 @@ const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&a
 const baca = (k, d) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } };
 const simpan = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
 
+const player = $("#player"), pv = $("#pv");
+
 const IK = {
   play: '<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>',
   bintang: '<svg viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>',
@@ -35,7 +37,7 @@ const PETA = {};
 
 function pasangData(j) {
   GRATIS = (j.gratis || []).map(x => ({ id: "g" + x.id, judul: x.judul || "", src: x.src, thumb: x.thumb || "", eks: false }));
-    EKS = (j.eksklusif || []).map(x => ({ id: "e" + x.id, judul: x.judul || "", src: x.src, thumb: x.thumb || "", eks: true }));
+  EKS = (j.eksklusif || []).map(x => ({ id: "e" + x.id, judul: x.judul || "", src: x.src, thumb: x.thumb || "", eks: true }));
   GRATIS.forEach((v, i) => { if (!v.judul) v.judul = "Video " + (GRATIS.length - i); });
   EKS.forEach((v, i) => { if (!v.judul) v.judul = "Eksklusif " + (EKS.length - i); });
   Object.keys(PETA).forEach(k => delete PETA[k]);
@@ -44,11 +46,13 @@ function pasangData(j) {
 
 async function muatVideo() {
   const cache = baca("sp_video", null);
-  if (cache) { pasangData(cache); renderSemua(); }
+  let sidik = "";
+  if (cache) { sidik = JSON.stringify(cache); pasangData(cache); renderSemua(); }
   try {
     const r = await fetch(API + "/api/video");
     const j = await r.json();
     if (!r.ok) throw new Error(j.error || "Gagal memuat video");
+    if (JSON.stringify(j) === sidik) return;
     simpan("sp_video", j);
     pasangData(j);
     renderSemua();
@@ -68,8 +72,8 @@ function renderSemua() {
   if (halaman === "aktivitas") renderAktivitas();
 }
 
-function kartu(v) {
-  const f = favs().includes(v.id);
+function kartu(v, f) {
+  const on = f.includes(v.id);
   const gambar = v.thumb ? `<img src="${esc(v.thumb)}" loading="lazy" decoding="async" alt="">` : "";
   return `<article class="kotak" data-id="${v.id}">
     <div class="thumb">${gambar}
@@ -77,7 +81,7 @@ function kartu(v) {
       ${v.eks ? `<span class="vip">${IK.kilau}EKSKLUSIF</span>` : ""}
     </div>
     <div class="info"><span class="jdl">${esc(v.judul)}</span>
-      <button class="bintang ${f ? "on" : ""}" data-fav="${v.id}" aria-label="Favorit">${IK.bintang}</button>
+      <button class="bintang ${on ? "on" : ""}" data-fav="${v.id}" aria-label="Favorit">${IK.bintang}</button>
     </div>
   </article>`;
 }
@@ -106,7 +110,8 @@ function tampilHal(el, hal, gulir) {
   const total = Math.max(1, Math.ceil(el._list.length / PER_HALAMAN));
   hal = Math.min(Math.max(1, hal), total);
   simpanHal(el, hal);
-  el.innerHTML = el._list.slice((hal - 1) * PER_HALAMAN, hal * PER_HALAMAN).map(kartu).join("") + tombolNomor(hal, total);
+  const f = favs();
+  el.innerHTML = el._list.slice((hal - 1) * PER_HALAMAN, hal * PER_HALAMAN).map(v => kartu(v, f)).join("") + tombolNomor(hal, total);
   $$(".nomor button", el).forEach(b => b.onclick = e => { e.stopPropagation(); tampilHal(el, +b.dataset.hal, true); });
   pasangThumb(el);
   if (gulir) window.scrollTo({ top: 0, behavior: "instant" });
@@ -119,32 +124,58 @@ function renderGrid(list, el, kosong) {
 }
 
 const antrianThumb = [];
+const sedangSrc = new Set();
 let sedangThumb = 0;
 const DI_FB = /FBAN|FBAV|FB_IAB|FBIOS|Instagram/i.test(navigator.userAgent);
 const MAKS_THUMB = DI_FB ? 2 : 3;
 const BATAS_DETIK = 20;
 const MAKS_COBA = 3;
 const JEDA_ULANG_DETIK = 5;
+const MASA_GAGAL = 3600000;
+const MAKS_CACHE = 40;
 
 const thumbGagal = baca("sp_thumb_gagal", {});
 const simpanGagal = () => simpan("sp_thumb_gagal", thumbGagal);
+const gagalN = src => { const g = thumbGagal[src]; return g && typeof g === "object" && Date.now() - g.t < MASA_GAGAL ? g.n : 0; };
 const videoDariBox = box => { const art = box.closest("[data-id]"); return art && PETA[art.dataset.id]; };
 
+const THUMB = new Map();
+
+function isiThumb(box, src) {
+  const asal = THUMB.get(src);
+  if (!asal || !box.isConnected || box.querySelector("canvas,img")) return;
+  const c = document.createElement("canvas");
+  c.width = asal.width;
+  c.height = asal.height;
+  c.getContext("2d").drawImage(asal, 0, 0);
+  box.insertBefore(c, box.firstChild);
+}
+
+function simpanCache(src, c) {
+  THUMB.set(src, c);
+  if (THUMB.size > MAKS_CACHE) THUMB.delete(THUMB.keys().next().value);
+  $$(".thumb").forEach(b => { const x = videoDariBox(b); if (x && x.src === src) isiThumb(b, src); });
+}
+
 function jalankanThumb() {
+  if (player.classList.contains("buka")) return;
   while (sedangThumb < MAKS_THUMB && antrianThumb.length) {
     const box = antrianThumb.shift();
     const v = videoDariBox(box);
     if (!v || !box.isConnected || box.querySelector("canvas,img")) continue;
-    if ((thumbGagal[v.src] || 0) >= MAKS_COBA) continue;
+    if (THUMB.has(v.src)) { isiThumb(box, v.src); continue; }
+    if (sedangSrc.has(v.src) || gagalN(v.src) >= MAKS_COBA) continue;
+    sedangSrc.add(v.src);
     sedangThumb++;
-    ambilFrame(box, v).then(ok => {
+    ambilFrame(v).then(ok => {
       sedangThumb--;
-      if (!ok && document.hidden) return;
+      sedangSrc.delete(v.src);
+      if (ok === null) { jalankanThumb(); return; }
       if (ok) {
         if (thumbGagal[v.src]) { delete thumbGagal[v.src]; simpanGagal(); }
       } else {
-        const n = (thumbGagal[v.src] || 0) + 1;
-        thumbGagal[v.src] = n;
+        const n = gagalN(v.src) + 1;
+        thumbGagal[v.src] = { n, t: Date.now() };
         simpanGagal();
         if (n < MAKS_COBA) setTimeout(() => { antrianThumb.push(box); jalankanThumb(); }, JEDA_ULANG_DETIK * n * 1000);
       }
@@ -153,24 +184,25 @@ function jalankanThumb() {
   }
 }
 
-const videoThumbAktif = new Set();
+const videoThumbAktif = new Map();
 
 function hentikanSemua() {
   antrianThumb.length = 0;
-  videoThumbAktif.forEach(v => { try { v.removeAttribute("src"); v.load(); } catch (e) {} });
-  videoThumbAktif.clear();
-  if (typeof pv !== "undefined" && pv) pv.pause();
+  [...videoThumbAktif.values()].forEach(batal => batal());
+  pv.pause();
 }
 window.addEventListener("pagehide", hentikanSemua);
 document.addEventListener("visibilitychange", () => {
-  if (document.hidden) hentikanSemua();
-  else $$(".thumb[data-pasang]").forEach(b => { if (!b.querySelector("canvas,img") && b.isConnected) { antrianThumb.push(b); } }), jalankanThumb();
+  if (document.hidden) { hentikanSemua(); return; }
+  $$(".thumb[data-pasang]").forEach(b => {
+    if (!b.querySelector("canvas,img") && b.isConnected) { thumbIO.unobserve(b); thumbIO.observe(b); }
+  });
+  jalankanThumb();
 });
 
-function ambilFrame(box, v) {
+function ambilFrame(v) {
   return new Promise(res => {
     const vid = document.createElement("video");
-    videoThumbAktif.add(vid);
     vid.muted = true;
     vid.playsInline = true;
     vid.preload = "auto";
@@ -184,6 +216,7 @@ function ambilFrame(box, v) {
       vid.load();
       res(ok);
     };
+    videoThumbAktif.set(vid, () => akhir(null));
     const t = setTimeout(() => akhir(false), BATAS_DETIK * 1000);
     vid.addEventListener("loadeddata", () => {
       const d = vid.duration;
@@ -192,13 +225,11 @@ function ambilFrame(box, v) {
     vid.addEventListener("seeked", () => requestAnimationFrame(() => {
       try {
         if (!vid.videoWidth) return akhir(false);
-        if (box.isConnected) {
-          const c = document.createElement("canvas");
-          c.width = 320;
-          c.height = Math.round(320 * vid.videoHeight / vid.videoWidth) || 200;
-          c.getContext("2d").drawImage(vid, 0, 0, c.width, c.height);
-          box.insertBefore(c, box.firstChild);
-        }
+        const c = document.createElement("canvas");
+        c.width = 320;
+        c.height = Math.round(320 * vid.videoHeight / vid.videoWidth) || 200;
+        c.getContext("2d").drawImage(vid, 0, 0, c.width, c.height);
+        simpanCache(v.src, c);
         akhir(true);
       } catch (e) { akhir(false); }
     }));
@@ -216,9 +247,11 @@ const thumbIO = new IntersectionObserver(es => es.forEach(en => {
 
 function pasangThumb(el) {
   $$(".thumb", el).forEach(b => {
-    if (b.querySelector("img") || b.dataset.pasang) return;
+    if (b.querySelector("img,canvas") || b.dataset.pasang) return;
     const v = videoDariBox(b);
-    if (v && (thumbGagal[v.src] || 0) >= MAKS_COBA) return;
+    if (!v) return;
+    if (THUMB.has(v.src)) { isiThumb(b, v.src); return; }
+    if (gagalN(v.src) >= MAKS_COBA) return;
     b.dataset.pasang = "1";
     thumbIO.observe(b);
   });
@@ -252,7 +285,6 @@ function renderSlider() {
   }, 5000);
 }
 
-const player = $("#player"), pv = $("#pv");
 let sedang = null;
 
 const pPlay = document.createElement("button");
@@ -300,6 +332,7 @@ function tutupVideo(dariKembali) {
   pv.load();
   player.classList.remove("buka");
   sedang = null;
+  jalankanThumb();
   if (halaman === "aktivitas") renderAktivitas();
   if (dariKembali !== true && history.state && history.state.player) history.back();
 }
@@ -372,11 +405,15 @@ function cariVideo(q) {
   renderGrid(h, $("#grid-home"), "Video tidak ditemukan.");
 }
 
-$("#cari").addEventListener("input", e => {
+let timerCari = null;
+$("#cari").addEventListener("input", () => {
   if (halaman !== "home") pindah("home");
   resetHal($("#grid-home"));
-  const q = e.target.value.trim();
-  if (q) cariVideo(q); else renderHome();
+  clearTimeout(timerCari);
+  timerCari = setTimeout(() => {
+    const q = $("#cari").value.trim();
+    if (q) cariVideo(q); else renderHome();
+  }, 250);
 });
 
 function renderEksklusif() {
@@ -433,3 +470,4 @@ function balikPosisi() {
 
 renderHome();
 muatVideo().then(balikPosisi);
+  
