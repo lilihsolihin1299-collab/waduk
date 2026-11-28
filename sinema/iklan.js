@@ -1,125 +1,60 @@
-const SMARTLINK_HALAMAN_AWAL = "https://uplcm.com/4/12287946";
-const POPUNDER_PLAY_1 = "12287947";
+const SMARTLINK_PLAY_1 = "https://uplcm.com/4/12287946";
 const SMARTLINK_PLAY_2 = "https://uplcm.com/4/12287946";
+const POPUNDER_ZONE = "12287947";
 
 (function () {
+  "use strict";
+
   let popunderDimuat = false;
-  let mauMain = false;
-  let ulang = null;
-  let tenang = 0;
-  let waktuSembunyi = -10000;
-  const sudahAwal = {};
-  const sudahPlay2 = {};
-
-  function bukaLink(url) {
-    if (url && url.trim()) window.open(url.trim(), "_blank", "noopener");
-  }
-
-  function muatPopunder() {
-    if (popunderDimuat || !POPUNDER_PLAY_1.trim()) return;
-    popunderDimuat = true;
-    const s = document.createElement("script");
-    s.src = "https://al5sm.com/tag.min.js";
-    s.async = true;
-    s.dataset.zone = POPUNDER_PLAY_1.trim();
-    document.body.appendChild(s);
-  }
-
-  const bukaAsli = window.bukaVideo;
-  if (typeof bukaAsli !== "function") return;
-
-  window.bukaVideo = function (id) {
-    mauMain = false;
-    bukaAsli(id);
-    if (!sudahAwal[id]) {
-      sudahAwal[id] = true;
-      bukaLink(SMARTLINK_HALAMAN_AWAL);
-    }
-    muatPopunder();
+  const smartlinkSudahDibuka = {
+    play1: false,
+    play2: false
   };
+  function muatPopunder() {
+    if (popunderDimuat || !POPUNDER_ZONE) return;
 
-  document.addEventListener("click", function (e) {
-    const tombol = e.target.closest(".p-play");
-    if (!tombol || !sedang) return;
-    mauMain = true;
-    const id = sedang.id;
-    if (!sudahPlay2[id]) {
-      sudahPlay2[id] = true;
-      bukaLink(SMARTLINK_PLAY_2);
-    }
-  }, true);
+    popunderDimuat = true;
 
-  function berhenti() {
-    clearInterval(ulang);
-    ulang = null;
+    const script = document.createElement("script");
+    script.src = "https://al5sm.com/tag.min.js";
+    script.async = true;
+    script.dataset.zone = POPUNDER_ZONE;
+
+    script.onerror = function () {
+      popunderDimuat = false;
+    };
+
+    document.body.appendChild(script);
   }
+  document.addEventListener("click", function (e) {
+    const link = e.target.closest("[data-smartlink]");
+    if (!link) return;
 
-  function cek() {
-    if (!mauMain || document.hidden) return;
-    if (!player.classList.contains("buka") || !pv.getAttribute("src") || pv.ended) {
-      mauMain = false;
-      berhenti();
+    const jenis = link.dataset.smartlink;
+
+    if (jenis !== "play1" && jenis !== "play2") return;
+
+    if (smartlinkSudahDibuka[jenis]) {
+      e.preventDefault();
       return;
     }
-    pPlay.hidden = true;
-    pv.setAttribute("controls", "");
-    if (pv.paused) {
-      tenang = 0;
-      pv.play().catch(() => {
-        pv.muted = true;
-        pv.play().catch(() => {});
-      });
-    } else {
-      tenang++;
-      if (tenang >= 8) berhenti();
-    }
-  }
 
-  function mulai() {
-    if (!mauMain) return;
-    berhenti();
-    let n = 0;
-    tenang = 0;
-    ulang = setInterval(() => {
-      n++;
-      if (n > 40) {
-        berhenti();
-        if (mauMain && pv.paused) {
-          pv.removeAttribute("controls");
-          pPlay.hidden = false;
-        }
-        return;
-      }
-      cek();
-    }, 250);
-    cek();
-  }
+    smartlinkSudahDibuka[jenis] = true;
 
-  function catatSembunyi() {
-    waktuSembunyi = performance.now();
-  }
+    const url = jenis === "play1"
+      ? SMARTLINK_PLAY_1
+      : SMARTLINK_PLAY_2;
 
-  pv.addEventListener("play", () => { mauMain = true; });
-  pv.addEventListener("ended", () => { mauMain = false; berhenti(); });
-  pv.addEventListener("pause", () => {
-    if (pv.ended) return;
-    if (document.hidden || performance.now() - waktuSembunyi < 2000) return;
-    mauMain = false;
+    link.href = url;
+  });
+  document.addEventListener("click", function (e) {
+    const tombol = e.target.closest(".p-play");
+
+    if (!tombol) return;
+
+    muatPopunder();
+  }, true);
+  window.addEventListener("pagehide", function () {
   });
 
-  new MutationObserver(() => {
-    if (ulang && mauMain && !document.hidden && !pPlay.hidden) pPlay.hidden = true;
-  }).observe(pPlay, { attributes: true, attributeFilter: ["hidden"] });
-
-  document.addEventListener("visibilitychange", () => {
-    if (document.hidden) { catatSembunyi(); berhenti(); }
-    else mulai();
-  });
-  window.addEventListener("pagehide", catatSembunyi);
-  window.addEventListener("focus", mulai);
-  window.addEventListener("pageshow", mulai);
-  document.getElementById("ptutup").addEventListener("click", () => {
-    mauMain = false;
-    berhenti();
-  });
 })();
