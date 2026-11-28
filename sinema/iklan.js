@@ -1,7 +1,7 @@
 const SMARTLINK_HALAMAN_AWAL = "https://uplcm.com/4/12287946";
 const POPUNDER_PLAY_1 = "12287947";
 const SMARTLINK_PLAY_2 = "https://uplcm.com/4/12287946";
-const JEDA_OVERLAY_DETIK = 10;
+const JEDA_OVERLAY_DETIK = 100000000;
 
 (function () {
   let popunderDimuat = false;
